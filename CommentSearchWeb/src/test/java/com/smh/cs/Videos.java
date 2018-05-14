@@ -9,9 +9,9 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.ResourceId;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
+import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.Thumbnail;
+import com.google.api.services.youtube.model.VideoListResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.util.Properties;
  *
  * @author Jeremy Walker
  */
-public class Search {
+public class Videos {
 
   /** Global instance properties filename. */
   private static String PROPERTIES_FILENAME = "youtube.properties";
@@ -54,7 +54,7 @@ public class Search {
     // Read the developer key from youtube.properties
     Properties properties = new Properties();
     try {
-      InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+      InputStream in = Videos.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
       properties.load(in);
 
     } catch (IOException e) {
@@ -74,36 +74,25 @@ public class Search {
       }).setApplicationName("youtube-cmdline-search-sample").build();
 
       // Get query term from user.
-      String queryTerm = getInputQuery();
+      
+      String videoId = "K-4v-SfVSDU";
+      
+//      String queryTerm = getInputQuery();
 
-      YouTube.Search.List search = youtube.search().list("id,snippet");
-      /*
-       * It is important to set your developer key from the Google Developer Console for
-       * non-authenticated requests (found under the API Access tab at this link:
-       * code.google.com/apis/). This is good practice and increased your quota.
-       */
-      String apiKey = properties.getProperty("youtube.apikey");
-      search.setKey(apiKey);
-      search.setQ(queryTerm);
-      search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
-      search.setEventType("live");
-      /*
-       * We are only searching for videos (not playlists or channels). If we were searching for
-       * more, we would add them as a string like this: "video,playlist,channel".
-       */
-      search.setType("video");
-      /*
-       * This method reduces the info returned to only the fields we need and makes calls more
-       * efficient.
-       */
-      search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
-      search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
-      SearchListResponse searchResponse = search.execute();
+      YouTube.Videos.List video = youtube.videos().list("id,snippet,contentDetails,statistics,liveStreamingDetails");
 
-      List<SearchResult> searchResultList = searchResponse.getItems();
+		String apiKey = properties.getProperty("youtube.apikey");
+		video.setKey(apiKey);
+		video.setId(videoId);
+//		video.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+		video.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+		
+		VideoListResponse videoResponse = video.execute();
+		List<Video> videoResultList = videoResponse.getItems();
+		
 
-      if (searchResultList != null) {
-        prettyPrint(searchResultList.iterator(), queryTerm);
+      if (videoResultList != null) {
+//        prettyPrint(videoResultList.iterator(), queryTerm);
       }
     } catch (GoogleJsonResponseException e) {
       System.err.println("There was a service error: " + e.getDetails().getCode() + " : "
@@ -132,40 +121,5 @@ public class Search {
     }
     return inputQuery;
   }
-
-  /*
-   * Prints out all SearchResults in the Iterator. Each printed line includes title, id, and
-   * thumbnail.
-   *
-   * @param iteratorSearchResults Iterator of SearchResults to print
-   *
-   * @param query Search query (String)
-   */
-  private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
-
-    System.out.println("\n=============================================================");
-    System.out.println(
-        "   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
-    System.out.println("=============================================================\n");
-
-    if (!iteratorSearchResults.hasNext()) {
-      System.out.println(" There aren't any results for your query.");
-    }
-
-    while (iteratorSearchResults.hasNext()) {
-
-      SearchResult singleVideo = iteratorSearchResults.next();
-      ResourceId rId = singleVideo.getId();
-
-      // Double checks the kind is video.
-      if (rId.getKind().equals("youtube#video")) {
-//        Thumbnail thumbnail = singleVideo.getSnippet().getThumbnails().get("default");
-
-        System.out.println(" Video Id" + rId.getVideoId());
-        System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
-//        System.out.println(" Thumbnail: " + thumbnail.getUrl());
-        System.out.println("\n-------------------------------------------------------------\n");
-      }
-    }
-  }
+ 
 }
