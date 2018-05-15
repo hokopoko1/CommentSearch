@@ -69,12 +69,25 @@ public class SearchSvc {
 	        System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
 //		        System.out.println(" Thumbnail: " + thumbnail.getUrl());
 	        System.out.println("\n-------------------------------------------------------------\n");
+	       
+	        List<Video> videoResultList = Videos(rId.getVideoId());
+	        
+	        Iterator<Video> iteratorVideosResults = videoResultList.iterator();
+	        
+	        while(iteratorVideosResults.hasNext()){
+	        	
+	        	Video singleActiveVideo = iteratorVideosResults.next();
+	        	String liveChatId = singleActiveVideo.getLiveStreamingDetails().getActiveLiveChatId();
+	        	System.out.println(" liveChatId" + liveChatId);
+	        	
+	        }
+	        
 	      }
 	    }
 		
 	}
 	
-	public void Videos(String videoId){
+	public List<Video> Videos(String videoId){
 		Properties properties = new Properties();
 	    try {
 	      InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
@@ -85,6 +98,8 @@ public class SearchSvc {
 	          + " : " + e.getMessage());
 	      System.exit(1);
 	    }
+	    
+	    List<Video> videoResultList = new ArrayList<Video>();
 	    
 	    try {
 		    youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
@@ -100,9 +115,7 @@ public class SearchSvc {
 			video.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
 			
 			VideoListResponse videoResponse = video.execute();
-			List<Video> videoResultList = videoResponse.getItems();
-			
-			
+			videoResultList = videoResponse.getItems();
 			
 		} catch (GoogleJsonResponseException e) {
 		      System.err.println("There was a service error: " + e.getDetails().getCode() + " : "
@@ -113,6 +126,7 @@ public class SearchSvc {
 	      t.printStackTrace();
 	    }
 	    
+	    return videoResultList;
 	}
 	
 	public List<SearchResult> Search(String channelId){

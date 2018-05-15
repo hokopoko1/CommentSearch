@@ -75,7 +75,7 @@ public class Videos {
 
       // Get query term from user.
       
-      String videoId = "K-4v-SfVSDU";
+      String videoId = "aR8Fe1lTKHo";
       
 //      String queryTerm = getInputQuery();
 
@@ -89,7 +89,16 @@ public class Videos {
 		
 		VideoListResponse videoResponse = video.execute();
 		List<Video> videoResultList = videoResponse.getItems();
-		
+        
+        Iterator<Video> iteratorVideosResults = videoResultList.iterator();
+        
+        while(iteratorVideosResults.hasNext()){
+        	
+        	Video singleActiveVideo = iteratorVideosResults.next();
+        	String liveChatId = singleActiveVideo.getLiveStreamingDetails().getActiveLiveChatId();
+        	System.out.println(" liveChatId = " + liveChatId);
+        	
+        }
 
       if (videoResultList != null) {
 //        prettyPrint(videoResultList.iterator(), queryTerm);
