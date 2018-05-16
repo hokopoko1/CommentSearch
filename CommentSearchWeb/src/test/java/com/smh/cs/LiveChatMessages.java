@@ -2,6 +2,12 @@ package com.smh.cs;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 //import com.google.api.services.samples.youtube.cmdline.Auth;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
@@ -12,8 +18,10 @@ import com.google.api.services.youtube.model.LiveChatMessageSnippet;
 import com.google.api.services.youtube.model.LiveChatSuperChatDetails;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,6 +36,21 @@ import java.util.TimerTask;
  * @author Jim Rogers
  */
 public class LiveChatMessages {
+
+	/** Global instance properties filename. */
+	private static String PROPERTIES_FILENAME = "youtube.properties";
+
+	/** Global instance of the HTTP transport. */
+	private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+
+	/** Global instance of the JSON factory. */
+	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
+
+	/**
+	 * Global instance of the max number of videos we want returned (50 = upper
+	 * limit per page).
+	 */
+	private static final long NUMBER_OF_VIDEOS_RETURNED = 25;
 
 	/**
 	 * Common fields to retrieve for chat messages
@@ -53,23 +76,45 @@ public class LiveChatMessages {
 	 */
 	public static void main(String[] args) {
 
+		
+		// Read the developer key from youtube.properties
+	    Properties properties = new Properties();
+	    try {
+	      InputStream in = LiveChatMessages.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      properties.load(in);
+
+	    } catch (IOException e) {
+	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+	          + " : " + e.getMessage());
+	      System.exit(1);
+	    }
+
+		
 		// This OAuth 2.0 access scope allows for read-only access to the
 		// authenticated user's account, but not other types of account access.
 		List<String> scopes = Lists.newArrayList(YouTubeScopes.YOUTUBE_READONLY);
 
-		
 		try {
 			// Authorize the request.
-//			Credential credential = Auth.authorize(scopes, "listlivechatmessages");
+			// Credential credential = Auth.authorize(scopes,
+			// "listlivechatmessages");
 
 			// This object is used to make YouTube Data API requests.
-//			youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential).setApplicationName("youtube-cmdline-listchatmessages-sample").build();
+			// youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT,
+			// Auth.JSON_FACTORY,
+			// credential).setApplicationName("youtube-cmdline-listchatmessages-sample").build();
 
 			// Get the liveChatId
-//			String liveChatId = args.length == 1 ? GetLiveChatId.getLiveChatId(youtube, args[0])
-//					: GetLiveChatId.getLiveChatId(youtube);
-			String liveChatId = "Cg0KC2FSOEZlMWxUS0hv";
+			// String liveChatId = args.length == 1 ?
+			// GetLiveChatId.getLiveChatId(youtube, args[0])
+			// : GetLiveChatId.getLiveChatId(youtube);
 			
+			youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+		        public void initialize(HttpRequest request) throws IOException {}
+		      }).setApplicationName("youtube-cmdline-search-sample").build();
+			
+			String liveChatId = "Cg0KC2FSOEZlMWxUS0hv";
+
 			if (liveChatId != null) {
 				System.out.println("Live chat id: " + liveChatId);
 			} else {
@@ -79,14 +124,15 @@ public class LiveChatMessages {
 
 			// Get live chat messages
 			listChatMessages(liveChatId, null, 0);
-//		} catch (GoogleJsonResponseException e) {
-//			System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode() + " : "
-//					+ e.getDetails().getMessage());
-//			e.printStackTrace();
-//
-//		} catch (IOException e) {
-//			System.err.println("IOException: " + e.getMessage());
-//			e.printStackTrace();
+			// } catch (GoogleJsonResponseException e) {
+			// System.err.println("GoogleJsonResponseException code: " +
+			// e.getDetails().getCode() + " : "
+			// + e.getDetails().getMessage());
+			// e.printStackTrace();
+			//
+			// } catch (IOException e) {
+			// System.err.println("IOException: " + e.getMessage());
+			// e.printStackTrace();
 		} catch (Throwable t) {
 			System.err.println("Throwable: " + t.getMessage());
 			t.printStackTrace();
