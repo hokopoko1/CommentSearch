@@ -86,7 +86,7 @@ public class Search {
       search.setKey(apiKey);
       search.setQ(queryTerm);
       search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
-      search.setEventType("live");
+      search.setEventType("completed");
       /*
        * We are only searching for videos (not playlists or channels). If we were searching for
        * more, we would add them as a string like this: "video,playlist,channel".
@@ -161,7 +161,7 @@ public class Search {
       if (rId.getKind().equals("youtube#video")) {
 //        Thumbnail thumbnail = singleVideo.getSnippet().getThumbnails().get("default");
 
-        System.out.println(" Video Id" + rId.getVideoId());
+        System.out.println(" Video Id: " + rId.getVideoId());
         System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
 //        System.out.println(" Thumbnail: " + thumbnail.getUrl());
         System.out.println("\n-------------------------------------------------------------\n");

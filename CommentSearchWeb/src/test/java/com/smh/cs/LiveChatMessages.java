@@ -8,6 +8,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 //import com.google.api.services.samples.youtube.cmdline.Auth;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
@@ -89,7 +90,7 @@ public class LiveChatMessages {
 	      System.exit(1);
 	    }
 
-		
+	    String apiKey = properties.getProperty("youtube.apikey");
 		// This OAuth 2.0 access scope allows for read-only access to the
 		// authenticated user's account, but not other types of account access.
 		List<String> scopes = Lists.newArrayList(YouTubeScopes.YOUTUBE_READONLY);
@@ -123,7 +124,7 @@ public class LiveChatMessages {
 			}
 
 			// Get live chat messages
-			listChatMessages(liveChatId, null, 0);
+			listChatMessages(liveChatId, null, 0, apiKey);
 			// } catch (GoogleJsonResponseException e) {
 			// System.err.println("GoogleJsonResponseException code: " +
 			// e.getDetails().getCode() + " : "
@@ -150,7 +151,7 @@ public class LiveChatMessages {
 	 * @param delayMs
 	 *            The delay in milliseconds before making the request.
 	 */
-	private static void listChatMessages(final String liveChatId, final String nextPageToken, long delayMs) {
+	private static void listChatMessages(final String liveChatId, final String nextPageToken, long delayMs, final String apiKey) {
 		System.out.println(String.format("Getting chat messages in %1$.3f seconds...", delayMs * 0.001));
 		Timer pollTimer = new Timer();
 		pollTimer.schedule(new TimerTask() {
@@ -159,7 +160,7 @@ public class LiveChatMessages {
 				try {
 					// Get chat messages from YouTube
 					LiveChatMessageListResponse response = youtube.liveChatMessages()
-							.list(liveChatId, "snippet, authorDetails").setPageToken(nextPageToken)
+							.list(liveChatId, "snippet, authorDetails").setPageToken(nextPageToken).setKey(apiKey)
 							.setFields(LIVE_CHAT_FIELDS).execute();
 
 					// Display messages and super chat details
@@ -167,12 +168,12 @@ public class LiveChatMessages {
 					for (int i = 0; i < messages.size(); i++) {
 						LiveChatMessage message = messages.get(i);
 						LiveChatMessageSnippet snippet = message.getSnippet();
-						System.out.println(buildOutput(snippet.getDisplayMessage(), message.getAuthorDetails(),
+						System.out.println(buildOutput(snippet.getPublishedAt(), snippet.getDisplayMessage(), message.getAuthorDetails(),
 								snippet.getSuperChatDetails()));
 					}
 
 					// Request the next page of messages
-					listChatMessages(liveChatId, response.getNextPageToken(), response.getPollingIntervalMillis());
+					listChatMessages(liveChatId, response.getNextPageToken(), response.getPollingIntervalMillis(), apiKey);
 				} catch (Throwable t) {
 					System.err.println("Throwable: " + t.getMessage());
 					t.printStackTrace();
@@ -192,15 +193,22 @@ public class LiveChatMessages {
 	 *            SuperChat details associated with the message.
 	 * @return A formatted string for console output.
 	 */
-	private static String buildOutput(String message, LiveChatMessageAuthorDetails author,
+	private static String buildOutput(DateTime dateTime, String message, LiveChatMessageAuthorDetails author,
 			LiveChatSuperChatDetails superChatDetails) {
 		StringBuilder output = new StringBuilder();
 		if (superChatDetails != null) {
 			output.append(superChatDetails.getAmountDisplayString());
 			output.append("SUPERCHAT RECEIVED FROM ");
 		}
+		
+		if (dateTime != null ) {
+			output.append(dateTime);
+			output.append(" ");
+		}
+		
 		output.append(author.getDisplayName());
 		List<String> roles = new ArrayList<String>();
+		
 		if (author.getIsChatOwner()) {
 			roles.add("OWNER");
 		}
@@ -219,6 +227,7 @@ public class LiveChatMessages {
 			}
 			output.append(")");
 		}
+		
 		if (message != null && !message.isEmpty()) {
 			output.append(": ");
 			output.append(message);

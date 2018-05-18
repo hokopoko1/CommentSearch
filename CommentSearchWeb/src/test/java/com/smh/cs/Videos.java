@@ -75,7 +75,7 @@ public class Videos {
 
       // Get query term from user.
       
-      String videoId = "IdaR8Fe1lTKHo";
+      String videoId = "uY8lFzsRGds";
       
 //      String queryTerm = getInputQuery();
 
