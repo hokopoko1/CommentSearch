@@ -108,7 +108,7 @@ public class CommentHandling {
             // Call the YouTube Data API's commentThreads.list method to
             // retrieve video comment threads.
             CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
-                    .list("snippet").setVideoId(videoId).setTextFormat("plainText").execute();
+                    .list("snippet").setKey(apiKey).setVideoId(videoId).setTextFormat("plainText").execute();
             List<CommentThread> videoComments = videoCommentsListResponse.getItems();
 
             if (videoComments.isEmpty()) {
