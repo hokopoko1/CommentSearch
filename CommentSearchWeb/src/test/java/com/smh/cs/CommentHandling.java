@@ -99,8 +99,8 @@ public class CommentHandling {
 
             // Prompt the user for the comment text.
             // Retrieve the text that the user is commenting.
-            String text = getText();
-            System.out.println("You chose " + text + " to subscribe.");
+//            String text = getText();
+//            System.out.println("You chose " + text + " to subscribe.");
 
             // All the available methods are used in sequence just for the sake
             // of an example.
@@ -120,6 +120,7 @@ public class CommentHandling {
                 for (CommentThread videoComment : videoComments) {
                     CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment()
                             .getSnippet();
+                    System.out.println("  - Time: " + snippet.getPublishedAt());
                     System.out.println("  - Author: " + snippet.getAuthorDisplayName());
                     System.out.println("  - Comment: " + snippet.getTextDisplay());
                     System.out
@@ -132,7 +133,7 @@ public class CommentHandling {
 
                 // Create a comment snippet with text.
                 CommentSnippet commentSnippet = new CommentSnippet();
-                commentSnippet.setTextOriginal(text);
+//                commentSnippet.setTextOriginal(text);
                 commentSnippet.setParentId(parentId);
 
                 // Create a comment with snippet.
@@ -144,69 +145,69 @@ public class CommentHandling {
                 // (If the intention is to create a new top-level comment,
                 // commentThreads.insert
                 // method should be used instead.)
-                Comment commentInsertResponse = youtube.comments().insert("snippet", comment)
-                        .execute();
+//                Comment commentInsertResponse = youtube.comments().insert("snippet", comment)
+//                        .execute();
 
                 // Print information from the API response.
-                System.out
-                        .println("\n================== Created Comment Reply ==================\n");
-                CommentSnippet snippet = commentInsertResponse.getSnippet();
-                System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-                System.out.println("  - Comment: " + snippet.getTextDisplay());
-                System.out
-                        .println("\n-------------------------------------------------------------\n");
+//                System.out
+//                        .println("\n================== Created Comment Reply ==================\n");
+//                CommentSnippet snippet = commentInsertResponse.getSnippet();
+//                System.out.println("  - Author: " + snippet.getAuthorDisplayName());
+//                System.out.println("  - Comment: " + snippet.getTextDisplay());
+//                System.out
+//                        .println("\n-------------------------------------------------------------\n");
 
                 // Call the YouTube Data API's comments.list method to retrieve
                 // existing comment
                 // replies.
-                CommentListResponse commentsListResponse = youtube.comments().list("snippet")
-                        .setParentId(parentId).setTextFormat("plainText").execute();
-                List<Comment> comments = commentsListResponse.getItems();
-
-                if (comments.isEmpty()) {
-                    System.out.println("Can't get comment replies.");
-                } else {
-                    // Print information from the API response.
-                    System.out
-                            .println("\n================== Returned Comment Replies ==================\n");
-                    for (Comment commentReply : comments) {
-                        snippet = commentReply.getSnippet();
-                        System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-                        System.out.println("  - Comment: " + snippet.getTextDisplay());
-                        System.out
-                                .println("\n-------------------------------------------------------------\n");
-                    }
-                    Comment firstCommentReply = comments.get(0);
-                    firstCommentReply.getSnippet().setTextOriginal("updated");
-                    Comment commentUpdateResponse = youtube.comments()
-                            .update("snippet", firstCommentReply).execute();
-                    // Print information from the API response.
-                    System.out
-                            .println("\n================== Updated Video Comment ==================\n");
-                    snippet = commentUpdateResponse.getSnippet();
-                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-                    System.out.println("  - Comment: " + snippet.getTextDisplay());
-                    System.out
-                            .println("\n-------------------------------------------------------------\n");
-
-                    // Call the YouTube Data API's comments.setModerationStatus
-                    // method to set moderation
-                    // status of an existing comment.
-                    youtube.comments().setModerationStatus(firstCommentReply.getId(), "published");
-                    System.out.println("  -  Changed comment status to published: "
-                            + firstCommentReply.getId());
-
-                    // Call the YouTube Data API's comments.markAsSpam method to
-                    // mark an existing comment as spam.
-                    youtube.comments().markAsSpam(firstCommentReply.getId());
-                    System.out.println("  -  Marked comment as spam: " + firstCommentReply.getId());
-
-                    // Call the YouTube Data API's comments.delete method to
-                    // delete an existing comment.
-                    youtube.comments().delete(firstCommentReply.getId());
-                    System.out
-                            .println("  -  Deleted comment as spam: " + firstCommentReply.getId());
-                }
+//                CommentListResponse commentsListResponse = youtube.comments().list("snippet")
+//                        .setParentId(parentId).setTextFormat("plainText").execute();
+//                List<Comment> comments = commentsListResponse.getItems();
+//
+//                if (comments.isEmpty()) {
+//                    System.out.println("Can't get comment replies.");
+//                } else {
+//                    // Print information from the API response.
+//                    System.out
+//                            .println("\n================== Returned Comment Replies ==================\n");
+//                    for (Comment commentReply : comments) {
+//                        snippet = commentReply.getSnippet();
+//                        System.out.println("  - Author: " + snippet.getAuthorDisplayName());
+//                        System.out.println("  - Comment: " + snippet.getTextDisplay());
+//                        System.out
+//                                .println("\n-------------------------------------------------------------\n");
+//                    }
+//                    Comment firstCommentReply = comments.get(0);
+//                    firstCommentReply.getSnippet().setTextOriginal("updated");
+//                    Comment commentUpdateResponse = youtube.comments()
+//                            .update("snippet", firstCommentReply).execute();
+//                    // Print information from the API response.
+//                    System.out
+//                            .println("\n================== Updated Video Comment ==================\n");
+//                    snippet = commentUpdateResponse.getSnippet();
+//                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
+//                    System.out.println("  - Comment: " + snippet.getTextDisplay());
+//                    System.out
+//                            .println("\n-------------------------------------------------------------\n");
+//
+//                    // Call the YouTube Data API's comments.setModerationStatus
+//                    // method to set moderation
+//                    // status of an existing comment.
+//                    youtube.comments().setModerationStatus(firstCommentReply.getId(), "published");
+//                    System.out.println("  -  Changed comment status to published: "
+//                            + firstCommentReply.getId());
+//
+//                    // Call the YouTube Data API's comments.markAsSpam method to
+//                    // mark an existing comment as spam.
+//                    youtube.comments().markAsSpam(firstCommentReply.getId());
+//                    System.out.println("  -  Marked comment as spam: " + firstCommentReply.getId());
+//
+//                    // Call the YouTube Data API's comments.delete method to
+//                    // delete an existing comment.
+//                    youtube.comments().delete(firstCommentReply.getId());
+//                    System.out
+//                            .println("  -  Deleted comment as spam: " + firstCommentReply.getId());
+//                }
             }
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode()
@@ -227,11 +228,11 @@ public class CommentHandling {
      */
     private static String getVideoId() throws IOException {
 
-        String videoId = "";
+        String videoId = "QUIoeyJmMqc";
 
-        System.out.print("Please enter a video id: ");
-        BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
-        videoId = bReader.readLine();
+//        System.out.print("Please enter a video id: ");
+//        BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
+//        videoId = bReader.readLine();
 
         return videoId;
     }
