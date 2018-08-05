@@ -19,6 +19,8 @@ public class SearchCtrl {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SearchCtrl.class);
 	
+	SearchSvc searchSvc = new SearchSvc();
+	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String home(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
@@ -29,6 +31,17 @@ public class SearchCtrl {
 		String formattedDate = dateFormat.format(date);
 		
 		model.addAttribute("serverTime", formattedDate );
+		
+		return "home";
+	}
+	
+	@RequestMapping(value = "/searchVideo", method = RequestMethod.GET)
+	public String searchVideo(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		String keyword = "뉴스";
+		
+		searchSvc.searchVideo(keyword);
 		
 		return "home";
 	}

@@ -1,7 +1,9 @@
 package com.smh.cs;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -48,6 +50,120 @@ public class SearchSvc {
 	/** Global instance of Youtube object to make all API requests. */
 	private static YouTube youtube;
 	
+	
+	public void searchVideo(String keyword) {
+		
+		Properties properties = new Properties();
+	    try {
+	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      properties.load(in);
+
+	    } catch (IOException e) {
+	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+	          + " : " + e.getMessage());
+	      System.exit(1);
+	    }
+	    
+		try {
+			/*
+			 * The YouTube object is used to make all API requests. The last argument is
+			 * required, but because we don't need anything initialized when the HttpRequest
+			 * is initialized, we override the interface and provide a no-op function.
+			 */
+			youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+				public void initialize(HttpRequest request) throws IOException {
+				}
+			}).setApplicationName("youtube-cmdline-search-sample").build();
+
+			// Get query term from user.
+//			String queryTerm = getInputQuery();
+
+			String queryTerm = keyword;
+			
+			YouTube.Search.List search = youtube.search().list("id,snippet");
+			/*
+			 * It is important to set your developer key from the Google Developer Console
+			 * for non-authenticated requests (found under the API Access tab at this link:
+			 * code.google.com/apis/). This is good practice and increased your quota.
+			 */
+			String apiKey = properties.getProperty("youtube.apikey");
+			search.setKey(apiKey);
+			search.setQ(queryTerm);
+			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
+			search.setEventType("completed");
+			/*
+			 * We are only searching for videos (not playlists or channels). If we were
+			 * searching for more, we would add them as a string like this:
+			 * "video,playlist,channel".
+			 */
+			search.setType("video");
+			/*
+			 * This method reduces the info returned to only the fields we need and makes
+			 * calls more efficient.
+			 */
+			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+			SearchListResponse searchResponse = search.execute();
+
+			List<SearchResult> searchResultList = searchResponse.getItems();
+
+			if (searchResultList != null) {
+				prettyPrint(searchResultList.iterator(), queryTerm);
+			}
+		} catch (GoogleJsonResponseException e) {
+			System.err.println(
+					"There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
+		} catch (IOException e) {
+			System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		
+	}
+	
+	private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
+
+		System.out.println("\n=============================================================");
+		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+		System.out.println("=============================================================\n");
+
+		if (!iteratorSearchResults.hasNext()) {
+			System.out.println(" There aren't any results for your query.");
+		}
+
+		while (iteratorSearchResults.hasNext()) {
+
+			SearchResult singleVideo = iteratorSearchResults.next();
+			ResourceId rId = singleVideo.getId();
+
+			// Double checks the kind is video.
+			if (rId.getKind().equals("youtube#video")) {
+				// Thumbnail thumbnail =
+				// singleVideo.getSnippet().getThumbnails().get("default");
+
+				System.out.println(" Video Id: " + rId.getVideoId());
+				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
+				System.out.println("\n-------------------------------------------------------------\n");
+			}
+		}
+	}
+	
+	private static String getInputQuery() throws IOException {
+
+		String inputQuery = "";
+
+		System.out.print("Please enter a search term: ");
+		BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
+		inputQuery = bReader.readLine();
+
+		if (inputQuery.length() < 1) {
+			// If nothing is entered, defaults to "YouTube Developers Live."
+			inputQuery = "YouTube Developers Live";
+		}
+		return inputQuery;
+	}
+	
 	public void getLiveChatInfo(){
 		
 		String channelId = "";
@@ -90,7 +206,7 @@ public class SearchSvc {
 	public List<Video> Videos(String videoId){
 		Properties properties = new Properties();
 	    try {
-	      InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      InputStream in = SearchTest.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
 	      properties.load(in);
 
 	    } catch (IOException e) {
@@ -133,7 +249,7 @@ public class SearchSvc {
 		
 		Properties properties = new Properties();
 	    try {
-	      InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      InputStream in = SearchTest.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
 	      properties.load(in);
 
 	    } catch (IOException e) {

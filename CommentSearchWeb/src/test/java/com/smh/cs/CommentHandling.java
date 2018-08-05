@@ -228,7 +228,7 @@ public class CommentHandling {
      */
     private static String getVideoId() throws IOException {
 
-        String videoId = "QUIoeyJmMqc";
+        String videoId = "NwkTNSjhkWA";
 
 //        System.out.print("Please enter a video id: ");
 //        BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
