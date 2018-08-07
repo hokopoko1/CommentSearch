@@ -33,10 +33,26 @@
 	<script type="text/javascript">
 	
 	function search(){
+		var keyword = document.getElementById("search").value;
 		
-		
+		var url="/searchVideo";  
+	    var params="keyword="+keyword;  
+	  
+	    $.ajax({      
+	        type:"GET",  
+	        url:url,      
+	        data:params,
+	        contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
+	        success:function(args){   
+	            alert("success!!");   
+	        },   
+	        error:function(e){  
+	            alert(e.responseText);  
+	        }  
+	    });  
+
+
 	}
-	
 	</script>
 	
 	
@@ -148,14 +164,12 @@
 								</div>
 								<div class="x_content">
 									<br />
-									<form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
-										<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
-				                        </label>
-				                        <div class="col-md-6 col-sm-6 col-xs-12">
-				                          <input type="text" id="first-name" required="required" class="form-control col-md-7 col-xs-12">
-				                        </div>
-										<button type="submit" class="btn btn-success">Submit</button>
-									</form>
+									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
+			                        </label>
+			                        <div class="col-md-6 col-sm-6 col-xs-12">
+			                          <input type="text" id="search" >
+			                        </div>
+									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
 							</div>
 						</div>

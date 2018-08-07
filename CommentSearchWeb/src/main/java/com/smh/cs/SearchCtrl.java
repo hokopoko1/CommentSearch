@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SearchCtrl {
@@ -36,10 +37,8 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.GET)
-	public String searchVideo(Locale locale, Model model) {
+	public String searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
-		
-		String keyword = "뉴스";
 		
 		searchSvc.searchVideo(keyword);
 		

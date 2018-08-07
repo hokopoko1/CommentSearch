@@ -89,7 +89,7 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
-			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
+//			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 			search.setEventType("completed");
 			/*
 			 * We are only searching for videos (not playlists or channels). If we were
@@ -110,6 +110,9 @@ public class SearchSvc {
 			if (searchResultList != null) {
 				prettyPrint(searchResultList.iterator(), queryTerm);
 			}
+			
+			
+			
 		} catch (GoogleJsonResponseException e) {
 			System.err.println(
 					"There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
