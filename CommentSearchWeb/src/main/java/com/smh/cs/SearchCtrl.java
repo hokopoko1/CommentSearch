@@ -2,6 +2,7 @@ package com.smh.cs;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.smh.cs.model.VideoInfo;
 
 @Controller
 public class SearchCtrl {
@@ -36,12 +39,21 @@ public class SearchCtrl {
 		return "home";
 	}
 	
-	@RequestMapping(value = "/searchVideo", method = RequestMethod.GET)
-	public String searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
+	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
+	public @ResponseBody List<VideoInfo> searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		searchSvc.searchVideo(keyword);
+		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword);
 		
-		return "home";
+		return videoInfo;
 	}
+	
+	@RequestMapping(value = "/getComment", method = RequestMethod.POST)
+	public @ResponseBody void getComment(@RequestParam("videoId") String videoId, Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		searchSvc.getComment(videoId);
+		
+	}
+	
 }

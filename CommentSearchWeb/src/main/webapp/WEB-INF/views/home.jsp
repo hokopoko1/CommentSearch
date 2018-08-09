@@ -39,12 +39,13 @@
 	    var params="keyword="+keyword;  
 	  
 	    $.ajax({      
-	        type:"GET",  
+	        type:"POST",  
 	        url:url,      
 	        data:params,
 	        contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
-	        success:function(args){   
-	            alert("success!!");   
+	        success:function(input){
+	            alert(input);
+	            
 	        },   
 	        error:function(e){  
 	            alert(e.responseText);  
@@ -53,6 +54,28 @@
 
 
 	}
+	
+	function comment(){
+		var videoId = document.getElementById("comment").value;
+		
+		var url="/getComment";  
+	    var params="videoId="+videoId;  
+	  
+	    $.ajax({      
+	        type:"POST",  
+	        url:url,      
+	        data:params,
+	        contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
+	        success:function(input){
+	            alert(input);
+	            
+	        },   
+	        error:function(e){  
+	            alert(e.responseText);  
+	        }  
+	    });  
+	}
+
 	</script>
 	
 	
@@ -170,6 +193,15 @@
 			                          <input type="text" id="search" >
 			                        </div>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
+								</div>
+								<div class="x_content">
+									<br />
+									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">videoId(comment) <span class="required">*</span>
+			                        </label>
+			                        <div class="col-md-6 col-sm-6 col-xs-12">
+			                          <input type="text" id="comment" >
+			                        </div>
+									<button type="submit" onclick="comment();" class="btn btn-success">Submit</button>
 								</div>
 							</div>
 						</div>
