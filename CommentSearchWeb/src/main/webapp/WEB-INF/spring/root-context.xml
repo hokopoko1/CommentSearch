@@ -16,9 +16,9 @@
 	<!--  dataSource  -->
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
-		<property name="url" value="jdbc:mysql://127.0.0.1:3306/csearch?serverTimezone=UTC&amp;useSSL=false"></property>
+		<property name="url" value="jdbc:mysql://csearch.cd4kt1opd2mz.ap-northeast-2.rds.amazonaws.com:3306/csearch?serverTimezone=UTC&amp;useSSL=false"></property>
 		<property name="username" value="root"></property>
-		<property name="password" value="root"></property>
+		<property name="password" value="1q2w3e4r"></property>
 	</bean> 
 	
 	<!-- SqlSessionFactory -->

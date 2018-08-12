@@ -31,6 +31,7 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
+import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.VideoInfo;
 
 @Component
@@ -98,6 +99,7 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
+			search.setMaxResults(50L);
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 			search.setEventType("completed");
 			/*
@@ -159,6 +161,9 @@ public class SearchSvc {
 				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
 				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
 				System.out.println("\n-------------------------------------------------------------\n");
+				
+				logger.debug(rId.getVideoId());
+				logger.debug(singleVideo.getSnippet().getTitle());
 				
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
@@ -334,9 +339,11 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	public void getComment(String videoId) {
+	public List<CommentInfo> getComment(String videoId) {
 		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
 
+		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
+		
         try {
             // Authorize the request.
 //            Credential credential = Auth.authorize(scopes, "commentthreads");
@@ -378,7 +385,7 @@ public class SearchSvc {
             // Call the YouTube Data API's commentThreads.list method to
             // retrieve video comment threads.
             CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
-                    .list("snippet").setKey(apiKey).setVideoId(videoId).setTextFormat("plainText").execute();
+                    .list("snippet").setKey(apiKey).setVideoId(videoId).setMaxResults(100L).setTextFormat("plainText").execute();
             List<CommentThread> videoComments = videoCommentsListResponse.getItems();
 
             if (videoComments.isEmpty()) {
@@ -387,7 +394,13 @@ public class SearchSvc {
                 // Print information from the API response.
                 System.out
                         .println("\n================== Returned Video Comments ==================\n");
+
+                CommentInfo commentInfo = null;
+                
                 for (CommentThread videoComment : videoComments) {
+                	
+                	commentInfo = new CommentInfo();
+                	
                     CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment()
                             .getSnippet();
                     System.out.println("  - Time: " + snippet.getPublishedAt());
@@ -395,6 +408,12 @@ public class SearchSvc {
                     System.out.println("  - Comment: " + snippet.getTextDisplay());
                     System.out
                             .println("\n-------------------------------------------------------------\n");
+                    
+                    commentInfo.setTime(snippet.getPublishedAt().toString());
+                    commentInfo.setAuthor(snippet.getAuthorDisplayName());
+                    commentInfo.setComment(snippet.getTextDisplay());
+                    
+                    commentInfoList.add(commentInfo);
                 }
                 CommentThread firstComment = videoComments.get(0);
 
@@ -491,6 +510,8 @@ public class SearchSvc {
             System.err.println("Throwable: " + t.getMessage());
             t.printStackTrace();
         }
+        
+        return commentInfoList;
 	}
 
 

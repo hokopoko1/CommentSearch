@@ -13,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.smh.cs.model.CommentInfo;
+import com.smh.cs.model.CommentInfoDT;
 import com.smh.cs.model.VideoInfo;
+import com.smh.cs.model.VideoInfoDT;
 
 @Controller
 public class SearchCtrl {
@@ -40,20 +44,27 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
-	public @ResponseBody List<VideoInfo> searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
+	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword);
+		VideoInfoDT rtn = new VideoInfoDT();
 		
-		return videoInfo;
+		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword);
+		rtn.setData(videoInfo);
+		
+		return rtn;
 	}
 	
 	@RequestMapping(value = "/getComment", method = RequestMethod.POST)
-	public @ResponseBody void getComment(@RequestParam("videoId") String videoId, Locale locale, Model model) {
+	public @ResponseBody CommentInfoDT getComment(@RequestParam("videoId") String videoId, Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		searchSvc.getComment(videoId);
+		CommentInfoDT rtn = new CommentInfoDT();
 		
+		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId);
+		rtn.setData(commentInfo);
+		
+		return rtn;
 	}
 	
 }

@@ -23,6 +23,8 @@
     <link href="/resources/vendors/starrr/dist/starrr.css" rel="stylesheet">
     <!-- bootstrap-daterangepicker -->
     <link href="/resources/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
+    
+    <link href="/resources/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom Theme Style -->
     <link href="/resources/build/css/custom.min.css" rel="stylesheet">
@@ -35,32 +37,62 @@
 	function search(){
 		var keyword = document.getElementById("search").value;
 		
-		var url="/searchVideo";  
-	    var params="keyword="+keyword;  
-	  
-	    $.ajax({      
-	        type:"POST",  
-	        url:url,      
-	        data:params,
-	        contentType: "application/x-www-form-urlencoded; charset=UTF-8", 
-	        success:function(input){
-	            alert(input);
-	            
-	        },   
-	        error:function(e){  
-	            alert(e.responseText);  
-	        }  
-	    });  
-
+		var uri="/searchVideo";  
+	    var params="?keyword="+keyword;  
+	    
+	    var oTable = $('#dataTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri + params,
+	    	},
+	    	columns: [
+	    		{ 
+	    			title: "videoId", data:"videoId", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" }
+	    	]
+	    	
+	    });
 
 	}
 	
-	function comment(){
-		var videoId = document.getElementById("comment").value;
+	function makeVideoId(videoId){
+		seletedVideoId = videoId;
 		
-		var url="/getComment";  
-	    var params="videoId="+videoId;  
-	  
+		return "<a href=\"javascript:comment()\">"+ videoId+ "</a>";
+	}
+	
+	var seletedVideoId
+	function comment(){
+		//var videoId = document.getElementById("comment").value;
+		
+		var uri="/getComment";  
+	    var params="?videoId="+seletedVideoId;  
+	    
+	    var oTable = $('#commentTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri + params,
+	    	},
+	    	columns: [
+	    		{ title: "Time", data:"time" },
+	    		{ title: "Author", data:"author" },
+	    		{ title: "Comment", data:"comment" }
+	    	]
+	    	
+	    });
+	    /*
 	    $.ajax({      
 	        type:"POST",  
 	        url:url,      
@@ -73,7 +105,8 @@
 	        error:function(e){  
 	            alert(e.responseText);  
 	        }  
-	    });  
+	    });
+	    */
 	}
 
 	</script>
@@ -109,32 +142,15 @@
 						<div class="menu_section">
 							<h3>General</h3>
 							<ul class="nav side-menu">
-								<li><a><i class="fa fa-home"></i> Home <span
-										class="fa fa-chevron-down"></span></a>
+								<li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
 									<ul class="nav child_menu">
 										<li><a href="index.html">Dashboard</a></li>
-										<li><a href="index2.html">Dashboard2</a></li>
-										<li><a href="index3.html">Dashboard3</a></li>
-									</ul></li>
+									</ul>
+								</li>
 							</ul>
 						</div>
 					</div>
 					<!-- /sidebar menu -->
-
-					<!-- /menu footer buttons -->
-					<div class="sidebar-footer hidden-small">
-						<a data-toggle="tooltip" data-placement="top" title="Settings">
-							<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-						</a> <a data-toggle="tooltip" data-placement="top" title="FullScreen">
-							<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
-						</a> <a data-toggle="tooltip" data-placement="top" title="Lock"> <span
-							class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
-						</a> <a data-toggle="tooltip" data-placement="top" title="Logout"
-							href="login.html"> <span class="glyphicon glyphicon-off"
-							aria-hidden="true"></span>
-						</a>
-					</div>
-					<!-- /menu footer buttons -->
 				</div>
 			</div>
 
@@ -147,11 +163,8 @@
 						</div>
 
 						<ul class="nav navbar-nav navbar-right">
-							<li class=""><a href="javascript:;"
-								class="user-profile dropdown-toggle" data-toggle="dropdown"
-								aria-expanded="false"> <span class=" fa fa-angle-down"></span>
+							<li class=""><a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false"> <span class=" fa fa-angle-down"></span>
 							</a></li>
-
 						</ul>
 					</nav>
 				</div>
@@ -175,11 +188,9 @@
 										Form Design <small>different form elements</small>
 									</h2>
 									<ul class="nav navbar-right panel_toolbox">
-										<li><a class="collapse-link"><i
-												class="fa fa-chevron-up"></i></a></li>
-										<li class="dropdown"><a href="#" class="dropdown-toggle"
-											data-toggle="dropdown" role="button" aria-expanded="false"><i
-												class="fa fa-wrench"></i></a></li>
+										<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+										<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+											<i class="fa fa-wrench"></i></a></li>
 										<li><a class="close-link"><i class="fa fa-close"></i></a>
 										</li>
 									</ul>
@@ -202,6 +213,30 @@
 			                          <input type="text" id="comment" >
 			                        </div>
 									<button type="submit" onclick="comment();" class="btn btn-success">Submit</button>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="x_panel">
+								<div class="x_title">
+									<ul class="nav navbar-right panel_toolbox">
+										<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+									</ul>
+								</div>
+								<div class="x_content">
+									<table class="table table-striped table-bordered" id="dataTables"></table>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="x_panel">
+								<div class="x_title">
+									<ul class="nav navbar-right panel_toolbox">
+										<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+									</ul>
+								</div>
+								<div class="x_content">
+									<table class="table table-striped table-bordered" id="commentTables"></table>
 								</div>
 							</div>
 						</div>
@@ -257,7 +292,8 @@
     <script src="/resources/vendors/starrr/dist/starrr.js"></script>
     <!-- Custom Theme Scripts -->
     <script src="/resources/build/js/custom.min.js"></script>
-
+    <script src="/resources/vendors/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/resources/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 </body>
 
 </html>
