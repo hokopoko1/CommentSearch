@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +12,11 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -31,6 +35,7 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
+import com.smh.cs.dao.SearchDao;
 import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.VideoInfo;
 
@@ -38,6 +43,8 @@ import com.smh.cs.model.VideoInfo;
 public class SearchSvc {
 
 	private static final Logger logger = LoggerFactory.getLogger(SearchSvc.class);
+	
+	private static final Logger SERVICE_LOGGER = LoggerFactory.getLogger("SERVICE_LOGGER");
 	
 	/** Global instance properties filename. */
 	private static String PROPERTIES_FILENAME = "youtube.properties";
@@ -57,6 +64,8 @@ public class SearchSvc {
 	/** Global instance of Youtube object to make all API requests. */
 	private static YouTube youtube;
 	
+	@Autowired
+	SearchDao searchDao;
 	
 	public List<VideoInfo> searchVideo(String keyword) {
 		
@@ -72,7 +81,7 @@ public class SearchSvc {
 	    }
 	    
 	    
-	    List<VideoInfo> videoInfo = new ArrayList<VideoInfo>();
+	    List<VideoInfo> videoInfoList = new ArrayList<VideoInfo>();
 	    
 		try {
 			/*
@@ -119,10 +128,8 @@ public class SearchSvc {
 			List<SearchResult> searchResultList = searchResponse.getItems();
 
 			if (searchResultList != null) {
-				prettyPrint(searchResultList.iterator(), queryTerm, videoInfo);
+				prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
 			}
-			
-			
 			
 		} catch (GoogleJsonResponseException e) {
 			System.err.println(
@@ -133,10 +140,19 @@ public class SearchSvc {
 			t.printStackTrace();
 		}
 		
-		return videoInfo;
+		try {
+			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(videoInfoList));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//searchDao.addVideoInfo(videoInfoList.get(0));
+		//searchDao.selectVideoInfo();
+		
+		return videoInfoList;
 	}
 	
-	private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfo) {
+	private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
 
 		System.out.println("\n=============================================================");
 		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
@@ -168,7 +184,9 @@ public class SearchSvc {
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
 				
-				videoInfo.add(tmpVideo);
+				tmpVideo.setCommentList(getComment(rId.getVideoId()));
+				
+				videoInfoList.add(tmpVideo);
 			}
 		}
 	}
@@ -339,7 +357,7 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	public List<CommentInfo> getComment(String videoId) {
+	static public List<CommentInfo> getComment(String videoId) {
 		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
 
 		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
