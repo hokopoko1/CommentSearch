@@ -16,7 +16,7 @@
 	<appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>f:/log/logexample.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<FileNamePattern>f:/log/log.%d{yyyy-MM-dd}</FileNamePattern>
+			<FileNamePattern>f:/log/CSEARCH.%d{yyyy-MM-dd}.log</FileNamePattern>
 		</rollingPolicy>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<Pattern>

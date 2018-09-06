@@ -49,7 +49,19 @@ public class SearchCtrl {
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword);
+		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search");
+		rtn.setData(videoInfo);
+		
+		return rtn;
+	}
+	
+	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
+	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		VideoInfoDT rtn = new VideoInfoDT();
+		
+		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "csearch");
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -61,7 +73,7 @@ public class SearchCtrl {
 		
 		CommentInfoDT rtn = new CommentInfoDT();
 		
-		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId);
+		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null);
 		rtn.setData(commentInfo);
 		
 		return rtn;

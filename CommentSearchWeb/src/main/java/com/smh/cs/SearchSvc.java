@@ -13,7 +13,12 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +42,9 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
 import com.smh.cs.dao.SearchDao;
 import com.smh.cs.model.CommentInfo;
+import com.smh.cs.model.Return;
 import com.smh.cs.model.VideoInfo;
+import com.smh.cs.model.VideoInfoLog;
 
 @Component
 public class SearchSvc {
@@ -65,9 +72,12 @@ public class SearchSvc {
 	private static YouTube youtube;
 	
 	@Autowired
+	private static RestTemplate restTemplate;
+	
+	@Autowired
 	SearchDao searchDao;
 	
-	public List<VideoInfo> searchVideo(String keyword) {
+	public List<VideoInfo> searchVideo(String keyword, String mode) {
 		
 		Properties properties = new Properties();
 	    try {
@@ -80,9 +90,7 @@ public class SearchSvc {
 	      System.exit(1);
 	    }
 	    
-	    
 	    List<VideoInfo> videoInfoList = new ArrayList<VideoInfo>();
-	    
 		try {
 			/*
 			 * The YouTube object is used to make all API requests. The last argument is
@@ -108,7 +116,7 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
-			search.setMaxResults(50L);
+//			search.setMaxResults(50L);
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 			search.setEventType("completed");
 			/*
@@ -128,7 +136,12 @@ public class SearchSvc {
 			List<SearchResult> searchResultList = searchResponse.getItems();
 
 			if (searchResultList != null) {
-				prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
+				if( "csearch".equals(mode)) {
+					prettyPrintCsearch(searchResultList.iterator(), queryTerm, videoInfoList);
+				}else {
+					prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
+				}
+				
 			}
 			
 		} catch (GoogleJsonResponseException e) {
@@ -140,12 +153,6 @@ public class SearchSvc {
 			t.printStackTrace();
 		}
 		
-		try {
-			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(videoInfoList));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		//searchDao.addVideoInfo(videoInfoList.get(0));
 		//searchDao.selectVideoInfo();
 		
@@ -161,13 +168,16 @@ public class SearchSvc {
 		if (!iteratorSearchResults.hasNext()) {
 			System.out.println(" There aren't any results for your query.");
 		}
-
+		
+		
+		
 		while (iteratorSearchResults.hasNext()) {
 
 			SearchResult singleVideo = iteratorSearchResults.next();
 			ResourceId rId = singleVideo.getId();
 
 			VideoInfo tmpVideo = new VideoInfo();
+			
 			// Double checks the kind is video.
 			if (rId.getKind().equals("youtube#video")) {
 				// Thumbnail thumbnail =
@@ -181,10 +191,56 @@ public class SearchSvc {
 				logger.debug(rId.getVideoId());
 				logger.debug(singleVideo.getSnippet().getTitle());
 				
+				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
+				
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setThumbnail(thumbnail);
 				
-				tmpVideo.setCommentList(getComment(rId.getVideoId()));
+				videoInfoList.add(tmpVideo);
+			}
+		}
+	}
+	
+	private static void prettyPrintCsearch(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+
+		System.out.println("\n=============================================================");
+		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+		System.out.println("=============================================================\n");
+
+		if (!iteratorSearchResults.hasNext()) {
+			System.out.println(" There aren't any results for your query.");
+		}
+		
+		
+		
+		while (iteratorSearchResults.hasNext()) {
+
+			SearchResult singleVideo = iteratorSearchResults.next();
+			ResourceId rId = singleVideo.getId();
+
+			VideoInfo tmpVideo = new VideoInfo();
+			
+			// Double checks the kind is video.
+			if (rId.getKind().equals("youtube#video")) {
+				// Thumbnail thumbnail =
+				// singleVideo.getSnippet().getThumbnails().get("default");
+
+				System.out.println(" Video Id: " + rId.getVideoId());
+				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
+				System.out.println("\n-------------------------------------------------------------\n");
+				
+				logger.debug(rId.getVideoId());
+				logger.debug(singleVideo.getSnippet().getTitle());
+				
+				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
+				
+				tmpVideo.setVideoId(rId.getVideoId());
+				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setThumbnail(thumbnail);
+				
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -357,9 +413,15 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<CommentInfo> getComment(String videoId) {
+	static public List<CommentInfo> getComment(String videoId, String title) {
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+		
 		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
-
+		
+		String url = "http://localhost:9200/";
+		
 		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
 		
         try {
@@ -415,8 +477,11 @@ public class SearchSvc {
 
                 CommentInfo commentInfo = null;
                 
+                VideoInfoLog log = new VideoInfoLog();
+//                ResponseEntity<Return> response = null;
+                HttpEntity<Object> requestEntity = null;
+                
                 for (CommentThread videoComment : videoComments) {
-                	
                 	commentInfo = new CommentInfo();
                 	
                     CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment()
@@ -431,7 +496,29 @@ public class SearchSvc {
                     commentInfo.setAuthor(snippet.getAuthorDisplayName());
                     commentInfo.setComment(snippet.getTextDisplay());
                     
+                    log.setVideoId(videoId);
+                    log.setTitle(title);
+                    log.setTime(snippet.getPublishedAt().toString());
+                    log.setAuthor(snippet.getAuthorDisplayName());
+                    log.setComment(snippet.getTextDisplay());
+                    
                     commentInfoList.add(commentInfo);
+                    
+                    try {
+                    	url = url + "csearch/1";
+                    	
+                    	requestEntity = new HttpEntity<Object>(log, headers);
+//                    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
+                    	
+//                    	HttpHeaders header = new HttpHeaders();
+//                	    header.add(HttpHeaders.ACCEPT, org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
+                    	
+            			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
+            		} catch (JsonProcessingException e) {
+            			// TODO Auto-generated catch block
+            			e.printStackTrace();
+            		}
                 }
                 CommentThread firstComment = videoComments.get(0);
 
@@ -447,74 +534,6 @@ public class SearchSvc {
                 Comment comment = new Comment();
                 comment.setSnippet(commentSnippet);
 
-                // Call the YouTube Data API's comments.insert method to reply
-                // to a comment.
-                // (If the intention is to create a new top-level comment,
-                // commentThreads.insert
-                // method should be used instead.)
-//                Comment commentInsertResponse = youtube.comments().insert("snippet", comment)
-//                        .execute();
-
-                // Print information from the API response.
-//                System.out
-//                        .println("\n================== Created Comment Reply ==================\n");
-//                CommentSnippet snippet = commentInsertResponse.getSnippet();
-//                System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-//                System.out.println("  - Comment: " + snippet.getTextDisplay());
-//                System.out
-//                        .println("\n-------------------------------------------------------------\n");
-
-                // Call the YouTube Data API's comments.list method to retrieve
-                // existing comment
-                // replies.
-//                CommentListResponse commentsListResponse = youtube.comments().list("snippet")
-//                        .setParentId(parentId).setTextFormat("plainText").execute();
-//                List<Comment> comments = commentsListResponse.getItems();
-//
-//                if (comments.isEmpty()) {
-//                    System.out.println("Can't get comment replies.");
-//                } else {
-//                    // Print information from the API response.
-//                    System.out
-//                            .println("\n================== Returned Comment Replies ==================\n");
-//                    for (Comment commentReply : comments) {
-//                        snippet = commentReply.getSnippet();
-//                        System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-//                        System.out.println("  - Comment: " + snippet.getTextDisplay());
-//                        System.out
-//                                .println("\n-------------------------------------------------------------\n");
-//                    }
-//                    Comment firstCommentReply = comments.get(0);
-//                    firstCommentReply.getSnippet().setTextOriginal("updated");
-//                    Comment commentUpdateResponse = youtube.comments()
-//                            .update("snippet", firstCommentReply).execute();
-//                    // Print information from the API response.
-//                    System.out
-//                            .println("\n================== Updated Video Comment ==================\n");
-//                    snippet = commentUpdateResponse.getSnippet();
-//                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-//                    System.out.println("  - Comment: " + snippet.getTextDisplay());
-//                    System.out
-//                            .println("\n-------------------------------------------------------------\n");
-//
-//                    // Call the YouTube Data API's comments.setModerationStatus
-//                    // method to set moderation
-//                    // status of an existing comment.
-//                    youtube.comments().setModerationStatus(firstCommentReply.getId(), "published");
-//                    System.out.println("  -  Changed comment status to published: "
-//                            + firstCommentReply.getId());
-//
-//                    // Call the YouTube Data API's comments.markAsSpam method to
-//                    // mark an existing comment as spam.
-//                    youtube.comments().markAsSpam(firstCommentReply.getId());
-//                    System.out.println("  -  Marked comment as spam: " + firstCommentReply.getId());
-//
-//                    // Call the YouTube Data API's comments.delete method to
-//                    // delete an existing comment.
-//                    youtube.comments().delete(firstCommentReply.getId());
-//                    System.out
-//                            .println("  -  Deleted comment as spam: " + firstCommentReply.getId());
-//                }
             }
         } catch (GoogleJsonResponseException e) {
             System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode()
@@ -525,7 +544,7 @@ public class SearchSvc {
             System.err.println("IOException: " + e.getMessage());
             e.printStackTrace();
         } catch (Throwable t) {
-            System.err.println("Throwable: " + t.getMessage());
+            System.err.println("Throwable: " + t);
             t.printStackTrace();
         }
         

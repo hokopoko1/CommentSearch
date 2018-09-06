@@ -50,10 +50,55 @@
 	 			url:uri + params,
 	    	},
 	    	columns: [
+	    		/*
 	    		{ 
-	    			title: "videoId", data:"videoId", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
 	    				$(nTd).html(
 	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" }
+	    	]
+	    	
+	    });
+
+	}
+	
+	function csearch(){
+		var keyword = document.getElementById("search").value;
+		
+		var uri="/csearchVideo";  
+	    var params="?keyword="+keyword;  
+	    
+	    var oTable = $('#dataTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri + params,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(sData)		
 	    				);}
 	    		},
 	    		{ title: "title", data:"title" }
@@ -67,6 +112,10 @@
 		seletedVideoId = videoId;
 		
 		return "<a href=\"javascript:comment()\">"+ videoId+ "</a>";
+	}
+	
+	function makeThumnail(url){
+		return "<img style='width: 100%; display: block;' src=" + url + ">";
 	}
 	
 	var seletedVideoId
@@ -205,6 +254,7 @@
 			                        </div>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
+								<!-- 
 								<div class="x_content">
 									<br />
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">videoId(comment) <span class="required">*</span>
@@ -214,9 +264,10 @@
 			                        </div>
 									<button type="submit" onclick="comment();" class="btn btn-success">Submit</button>
 								</div>
+								 -->
 							</div>
 						</div>
-						<div class="col-md-12 col-sm-12 col-xs-12">
+						<div class="col-md-6 col-sm-6 col-xs-12">
 							<div class="x_panel">
 								<div class="x_title">
 									<ul class="nav navbar-right panel_toolbox">
@@ -225,6 +276,18 @@
 								</div>
 								<div class="x_content">
 									<table class="table table-striped table-bordered" id="dataTables"></table>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<div class="x_panel">
+								<div class="x_title">
+									<ul class="nav navbar-right panel_toolbox">
+										<li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+									</ul>
+								</div>
+								<div class="x_content">
+									<table class="table table-striped table-bordered" id="csearchTables"></table>
 								</div>
 							</div>
 						</div>

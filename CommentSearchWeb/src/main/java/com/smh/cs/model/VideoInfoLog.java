@@ -1,18 +1,17 @@
 package com.smh.cs.model;
 
-import java.util.List;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VideoInfo {
+public class VideoInfoLog {
 
 	String videoId;
 	String title;
-	String thumbnail;
-	List<CommentInfo> commentList;
+	String time;
+	String author;
+	String comment;
 	
 	public String getVideoId() {
 		return videoId;
@@ -26,17 +25,23 @@ public class VideoInfo {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getThumbnail() {
-		return thumbnail;
+	public String getTime() {
+		return time;
 	}
-	public void setThumbnail(String thumbnail) {
-		this.thumbnail = thumbnail;
+	public void setTime(String time) {
+		this.time = time;
 	}
-	public List<CommentInfo> getCommentList() {
-		return commentList;
+	public String getAuthor() {
+		return author;
 	}
-	public void setCommentList(List<CommentInfo> commentList) {
-		this.commentList = commentList;
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 	
 }
