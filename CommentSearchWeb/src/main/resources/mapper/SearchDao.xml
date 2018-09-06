@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smh.cs.dao.SearchDao">
+	<insert id="addVideoInfo" parameterType="com.smh.cs.model.VideoInfo">
+		INSET IGNORE INTO
+			video(
+				video_id,
+				title
+			)
+		VALUES
+			(
+				#{videoId},
+				#{title}		
+			)
+	</insert>
+	
+	<select id="selectVideoInfo">
+		SELECT * FROM video
+	</select>
+
+</mapper>
