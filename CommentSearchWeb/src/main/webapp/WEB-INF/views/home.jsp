@@ -27,7 +27,7 @@
     <link href="/resources/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom Theme Style -->
-    <link href="/resources/build/css/custom.min.css" rel="stylesheet">
+    <link href="/resources/custom/css/custom.min.css" rel="stylesheet">
 	
 	</head>
 
@@ -354,7 +354,7 @@
     <!-- starrr -->
     <script src="/resources/vendors/starrr/dist/starrr.js"></script>
     <!-- Custom Theme Scripts -->
-    <script src="/resources/build/js/custom.min.js"></script>
+    <script src="/resources/custom/js/custom.min.js"></script>
     <script src="/resources/vendors/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="/resources/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 </body>
