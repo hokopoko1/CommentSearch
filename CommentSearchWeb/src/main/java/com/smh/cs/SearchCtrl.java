@@ -61,8 +61,11 @@ public class SearchCtrl {
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "csearch");
-		rtn.setData(videoInfo);
+		//List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "csearch");
+		
+		searchSvc.csearchVideo(keyword);
+		
+		//rtn.setData(videoInfo);
 		
 		return rtn;
 	}

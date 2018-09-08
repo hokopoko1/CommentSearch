@@ -35,8 +35,9 @@
 	<script type="text/javascript">
 	
 	function search(){
-		var keyword = document.getElementById("search").value;
+		csearch();
 		
+		var keyword = document.getElementById("search").value;
 		var uri="/searchVideo";  
 	    var params="?keyword="+keyword;  
 	    
@@ -77,7 +78,7 @@
 		var uri="/csearchVideo";  
 	    var params="?keyword="+keyword;  
 	    
-	    var oTable = $('#dataTables').DataTable({
+	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
 	    	"serverSide" : true,
 	    	destroy : true,
@@ -250,7 +251,7 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" >
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search()();}"/>
 			                        </div>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>

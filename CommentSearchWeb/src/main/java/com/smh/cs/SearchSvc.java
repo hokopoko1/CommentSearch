@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +78,44 @@ public class SearchSvc {
 	
 	@Autowired
 	SearchDao searchDao;
+	
+	public List<VideoInfo> csearchVideo(String keyword) {
+		//TODO:
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+		
+//      ResponseEntity<Return> response = null;
+		HttpEntity<Object> requestEntity = null;
+		
+//    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
+    	
+		JSONObject requestBody = new JSONObject();
+		JSONObject match = new JSONObject();
+		JSONObject comment = new JSONObject();
+		JSONObject terms = new JSONObject();
+		JSONObject dedup = new JSONObject();
+		JSONObject field = new JSONObject();
+		
+		comment.put("comment", keyword);
+		match.put("match", comment);
+		requestBody.put("query", match);
+		
+		field.put("field", "time");
+		terms.put("terms", field);
+		dedup.put("dedup", terms);
+		
+		requestBody.put("aggs", dedup);
+		
+		requestEntity = new HttpEntity<Object>(requestBody, headers);
+		
+//    	HttpHeaders header = new HttpHeaders();
+//	    header.add(HttpHeaders.ACCEPT, org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/_search", HttpMethod.POST, requestEntity, String.class);
+    		System.out.print(response);
+		
+		return null;
+	}
+	
 	
 	public List<VideoInfo> searchVideo(String keyword, String mode) {
 		
@@ -169,8 +209,6 @@ public class SearchSvc {
 			System.out.println(" There aren't any results for your query.");
 		}
 		
-		
-		
 		while (iteratorSearchResults.hasNext()) {
 
 			SearchResult singleVideo = iteratorSearchResults.next();
@@ -211,8 +249,6 @@ public class SearchSvc {
 		if (!iteratorSearchResults.hasNext()) {
 			System.out.println(" There aren't any results for your query.");
 		}
-		
-		
 		
 		while (iteratorSearchResults.hasNext()) {
 

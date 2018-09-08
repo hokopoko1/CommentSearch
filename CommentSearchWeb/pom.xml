@@ -156,6 +156,12 @@
 		    <version>v3-rev204-1.24.1</version>
 		</dependency>
 	
+		<dependency>
+		    <groupId>com.googlecode.json-simple</groupId>
+		    <artifactId>json-simple</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+	
 	    <dependency>
 		    <groupId>com.google.http-client</groupId>
 		    <artifactId>google-http-client-jackson2</artifactId>
