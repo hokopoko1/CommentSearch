@@ -1,10 +1,12 @@
 package com.smh.cs;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -56,7 +58,7 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
+	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) throws IOException, ParseException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();

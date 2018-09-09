@@ -167,11 +167,23 @@
 		    <artifactId>google-http-client-jackson2</artifactId>
 		    <version>1.24.1</version>
 		</dependency>
-		
+<!-- 		
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.5</version>
+		</dependency>
+ -->
+		<dependency>
+		    <groupId>org.elasticsearch.client</groupId>
+		    <artifactId>elasticsearch-rest-client</artifactId>
+		    <version>6.4.0</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.elasticsearch</groupId>
+		    <artifactId>elasticsearch</artifactId>
+		    <version>6.3.0</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->

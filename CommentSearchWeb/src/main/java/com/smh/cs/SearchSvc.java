@@ -10,18 +10,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.http.HttpHost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -44,6 +50,8 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
 import com.smh.cs.dao.SearchDao;
 import com.smh.cs.model.CommentInfo;
+import com.smh.cs.model.Hits;
+import com.smh.cs.model.ResponseHits;
 import com.smh.cs.model.Return;
 import com.smh.cs.model.VideoInfo;
 import com.smh.cs.model.VideoInfoLog;
@@ -79,13 +87,13 @@ public class SearchSvc {
 	@Autowired
 	SearchDao searchDao;
 	
-	public List<VideoInfo> csearchVideo(String keyword) {
+	public List<VideoInfo> csearchVideo(String keyword) throws IOException {
 		//TODO:
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		
 //      ResponseEntity<Return> response = null;
-		HttpEntity<Object> requestEntity = null;
+//		HttpEntity<Object> requestEntity = null;
 		
 //    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
     	
@@ -106,12 +114,28 @@ public class SearchSvc {
 		
 		requestBody.put("aggs", dedup);
 		
-		requestEntity = new HttpEntity<Object>(requestBody, headers);
+//		requestEntity = new HttpEntity<Object>(requestBody, headers);
+		RestClient restClient = RestClient.builder(
+		        new HttpHost("124.111.196.176", 9200, "http"),
+		        new HttpHost("124.111.196.176", 9201, "http")).build();
 		
-//    	HttpHeaders header = new HttpHeaders();
-//	    header.add(HttpHeaders.ACCEPT, org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
-	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/_search", HttpMethod.POST, requestEntity, String.class);
-    		System.out.print(response);
+		Request request = new Request(
+			    "POST",  
+			    "/csearch/1/_search");   
+		
+		String reqbody = requestBody.toJSONString();
+		
+		request.setEntity(new NStringEntity(
+				reqbody,
+		        ContentType.APPLICATION_JSON));
+		
+		Response response = restClient.performRequest(request);
+		String responseBody = EntityUtils.toString(response.getEntity());
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		ResponseHits responseHits = mapper.readValue(responseBody, ResponseHits.class);
+		
 		
 		return null;
 	}
@@ -221,10 +245,10 @@ public class SearchSvc {
 				// Thumbnail thumbnail =
 				// singleVideo.getSnippet().getThumbnails().get("default");
 
-				System.out.println(" Video Id: " + rId.getVideoId());
-				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+//				System.out.println(" Video Id: " + rId.getVideoId());
+//				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
 				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
-				System.out.println("\n-------------------------------------------------------------\n");
+//				System.out.println("\n-------------------------------------------------------------\n");
 				
 				logger.debug(rId.getVideoId());
 				logger.debug(singleVideo.getSnippet().getTitle());
@@ -451,8 +475,8 @@ public class SearchSvc {
 	
 	static public List<CommentInfo> getComment(String videoId, String title) {
 		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		
 		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
 		
@@ -515,7 +539,7 @@ public class SearchSvc {
                 
                 VideoInfoLog log = new VideoInfoLog();
 //                ResponseEntity<Return> response = null;
-                HttpEntity<Object> requestEntity = null;
+//                HttpEntity<Object> requestEntity = null;
                 
                 for (CommentThread videoComment : videoComments) {
                 	commentInfo = new CommentInfo();
@@ -543,12 +567,12 @@ public class SearchSvc {
                     try {
                     	url = url + "csearch/1";
                     	
-                    	requestEntity = new HttpEntity<Object>(log, headers);
+//                    	requestEntity = new HttpEntity<Object>(log, headers);
 //                    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
                     	
 //                    	HttpHeaders header = new HttpHeaders();
 //                	    header.add(HttpHeaders.ACCEPT, org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
-                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
+//                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
                     	
             			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
             		} catch (JsonProcessingException e) {
