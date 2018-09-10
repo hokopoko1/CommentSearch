@@ -58,16 +58,17 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) throws IOException, ParseException {
+	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, Locale locale, Model model) throws IOException, ParseException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		//List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "csearch");
+		if( "true".equals(learning) ) {
+			searchSvc.searchVideo(keyword, "csearch");
+		}
 		
-		searchSvc.csearchVideo(keyword);
-		
-		//rtn.setData(videoInfo);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword);
+		rtn.setData(videoInfo);
 		
 		return rtn;
 	}
@@ -78,7 +79,7 @@ public class SearchCtrl {
 		
 		CommentInfoDT rtn = new CommentInfoDT();
 		
-		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null);
+		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null, null);
 		rtn.setData(commentInfo);
 		
 		return rtn;

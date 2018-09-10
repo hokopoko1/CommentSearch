@@ -21,6 +21,8 @@
     <link href="/resources/vendors/switchery/dist/switchery.min.css" rel="stylesheet">
     <!-- starrr -->
     <link href="/resources/vendors/starrr/dist/starrr.css" rel="stylesheet">
+    
+    <link href="/resources/vendors/switchery/dist/switchery.min.css" rel="stylesheet">
     <!-- bootstrap-daterangepicker -->
     <link href="/resources/vendors/bootstrap-daterangepicker/daterangepicker.css" rel="stylesheet">
     
@@ -62,7 +64,7 @@
 	    		{
 	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
 	    				$(nTd).html(
-	    					makeThumnail(sData)		
+	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
 	    		{ title: "title", data:"title" }
@@ -74,9 +76,10 @@
 	
 	function csearch(){
 		var keyword = document.getElementById("search").value;
+		var learning = document.getElementById("learning").checked?"true":"false";
 		
 		var uri="/csearchVideo";  
-	    var params="?keyword="+keyword;  
+	    var params="?keyword="+keyword+"&learning="+learning;  
 	    
 	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
@@ -99,7 +102,7 @@
 	    		{
 	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
 	    				$(nTd).html(
-	    					makeThumnail(sData)		
+	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
 	    		{ title: "title", data:"title" }
@@ -115,8 +118,11 @@
 		return "<a href=\"javascript:comment()\">"+ videoId+ "</a>";
 	}
 	
-	function makeThumnail(url){
-		return "<img style='width: 100%; display: block;' src=" + url + ">";
+	function makeThumnail(videoId, url){
+		
+		var aurl = "https://www.youtube.com/watch?v="+videoId;
+		
+		return "<a target='_blank' href="+aurl+">"+"<img style='width: 100%; display: block;' src=" + url + "></a>";
 	}
 	
 	var seletedVideoId
@@ -255,6 +261,11 @@
 			                        </div>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
+								<div class="">
+		                            <label>
+		                              <input type="checkbox" id="learning" class="js-switch" checked /> learning
+		                            </label>
+		                        </div>
 								<!-- 
 								<div class="x_content">
 									<br />
@@ -356,6 +367,8 @@
     <script src="/resources/vendors/starrr/dist/starrr.js"></script>
     <!-- Custom Theme Scripts -->
     <script src="/resources/custom/js/custom.min.js"></script>
+    <script src="/resources/vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
+    
     <script src="/resources/vendors/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="/resources/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 </body>

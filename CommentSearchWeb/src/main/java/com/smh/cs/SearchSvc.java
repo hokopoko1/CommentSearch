@@ -24,6 +24,10 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -49,7 +53,9 @@ import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
 import com.smh.cs.dao.SearchDao;
+import com.smh.cs.model.Bucket;
 import com.smh.cs.model.CommentInfo;
+import com.smh.cs.model.Hit;
 import com.smh.cs.model.Hits;
 import com.smh.cs.model.ResponseHits;
 import com.smh.cs.model.Return;
@@ -98,21 +104,44 @@ public class SearchSvc {
 //    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
     	
 		JSONObject requestBody = new JSONObject();
-		JSONObject match = new JSONObject();
+		JSONObject multi_match = new JSONObject();
+		JSONObject query = new JSONObject();
+		
 		JSONObject comment = new JSONObject();
 		JSONObject terms = new JSONObject();
 		JSONObject dedup = new JSONObject();
+		JSONObject fields = new JSONObject();
 		JSONObject field = new JSONObject();
+		JSONArray fieldData =  new JSONArray();
 		
-		comment.put("comment", keyword);
-		match.put("match", comment);
-		requestBody.put("query", match);
+		JSONObject dedup_docs = new JSONObject();
+		JSONObject top_hits = new JSONObject();
+		JSONObject size = new JSONObject();
 		
-		field.put("field", "time");
-		terms.put("terms", field);
-		dedup.put("dedup", terms);
+		JSONObject aggs = new JSONObject();
+		JSONObject aggsh = new JSONObject();
 		
-		requestBody.put("aggs", dedup);
+		fieldData.add("title");
+		fieldData.add("comment");
+		
+		multi_match.put("query", keyword);
+		multi_match.put("fields", fieldData);
+		
+		query.put("multi_match", multi_match);
+		
+		terms.put("field", "videoTime");
+		
+		top_hits.put("size", "1");
+		dedup_docs.put("top_hits", top_hits);
+		aggs.put("dedup_docs", dedup_docs);
+
+		dedup.put("terms", terms);
+		dedup.put("aggs", aggs);
+		
+		aggsh.put("dedup", dedup);
+		
+		requestBody.put("query", query);
+		requestBody.put("aggs", aggsh);
 		
 //		requestEntity = new HttpEntity<Object>(requestBody, headers);
 		RestClient restClient = RestClient.builder(
@@ -136,8 +165,26 @@ public class SearchSvc {
 		
 		ResponseHits responseHits = mapper.readValue(responseBody, ResponseHits.class);
 		
+		List<VideoInfo> csearchList = new ArrayList<VideoInfo>();
+		VideoInfo tmpVideoInfo = new VideoInfo();
+		String thumbnail = null;
 		
-		return null;
+		for( Bucket bucket : responseHits.getAggregations().getDedup().getBuckets() ) {
+			
+			tmpVideoInfo = new VideoInfo();
+			
+			for( Hit hit :  bucket.getDedup_docs().getHits().getHits() ) {
+				thumbnail = "https://i.ytimg.com/vi/" + hit.getSource().getVideoId() + "/hqdefault.jpg";
+				tmpVideoInfo.setVideoId(hit.getSource().getVideoId());
+				tmpVideoInfo.setTitle(hit.getSource().getTitle());
+				tmpVideoInfo.setTime(hit.getSource().getTime());
+				tmpVideoInfo.setThumbnail(thumbnail);
+				
+				csearchList.add(tmpVideoInfo);
+			}
+		}
+		
+		return csearchList;
 	}
 	
 	
@@ -180,7 +227,9 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
-//			search.setMaxResults(50L);
+			if("csearch".equals(mode)) {
+				search.setMaxResults(50L);
+			}
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 			search.setEventType("completed");
 			/*
@@ -193,7 +242,7 @@ public class SearchSvc {
 			 * This method reduces the info returned to only the fields we need and makes
 			 * calls more efficient.
 			 */
-			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+			//search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
 			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
 			SearchListResponse searchResponse = search.execute();
 
@@ -298,9 +347,10 @@ public class SearchSvc {
 				
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
 				
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle()));
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -473,26 +523,14 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<CommentInfo> getComment(String videoId, String title) {
+	static public List<CommentInfo> getComment(String videoId, String title, String videoTime) {
 		
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		
-		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
-		
-		String url = "http://localhost:9200/";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		
 		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
 		
         try {
-            // Authorize the request.
-//            Credential credential = Auth.authorize(scopes, "commentthreads");
-
-            // This object is used to make YouTube Data API requests.
-//            youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, credential)
-//                    .setApplicationName("youtube-cmdline-commentthreads-sample").build();
-
-        	// Read the developer key from youtube.properties
     	    Properties properties = new Properties();
     	    try {
     	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
@@ -510,20 +548,7 @@ public class SearchSvc {
 		        public void initialize(HttpRequest request) throws IOException {}
 		      }).setApplicationName("youtube-cmdline-search-sample").build();
         	
-            // Prompt the user for the ID of a video to comment on.
-            // Retrieve the video ID that the user is commenting to.
             System.out.println("You chose " + videoId + " to subscribe.");
-
-            // Prompt the user for the comment text.
-            // Retrieve the text that the user is commenting.
-//            String text = getText();
-//            System.out.println("You chose " + text + " to subscribe.");
-
-            // All the available methods are used in sequence just for the sake
-            // of an example.
-
-            // Call the YouTube Data API's commentThreads.list method to
-            // retrieve video comment threads.
             CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
                     .list("snippet").setKey(apiKey).setVideoId(videoId).setMaxResults(100L).setTextFormat("plainText").execute();
             List<CommentThread> videoComments = videoCommentsListResponse.getItems();
@@ -538,8 +563,7 @@ public class SearchSvc {
                 CommentInfo commentInfo = null;
                 
                 VideoInfoLog log = new VideoInfoLog();
-//                ResponseEntity<Return> response = null;
-//                HttpEntity<Object> requestEntity = null;
+                HttpEntity<Object> requestEntity = null;
                 
                 for (CommentThread videoComment : videoComments) {
                 	commentInfo = new CommentInfo();
@@ -558,6 +582,7 @@ public class SearchSvc {
                     
                     log.setVideoId(videoId);
                     log.setTitle(title);
+                    log.setVideoTime(videoTime);
                     log.setTime(snippet.getPublishedAt().toString());
                     log.setAuthor(snippet.getAuthorDisplayName());
                     log.setComment(snippet.getTextDisplay());
@@ -565,14 +590,9 @@ public class SearchSvc {
                     commentInfoList.add(commentInfo);
                     
                     try {
-                    	url = url + "csearch/1";
+                    	requestEntity = new HttpEntity<Object>(log, headers);
                     	
-//                    	requestEntity = new HttpEntity<Object>(log, headers);
-//                    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
-                    	
-//                    	HttpHeaders header = new HttpHeaders();
-//                	    header.add(HttpHeaders.ACCEPT, org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
-//                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
+                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
                     	
             			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
             		} catch (JsonProcessingException e) {

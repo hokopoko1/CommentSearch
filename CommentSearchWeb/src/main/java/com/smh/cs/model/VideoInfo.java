@@ -11,6 +11,8 @@ public class VideoInfo {
 
 	String videoId;
 	String title;
+	String videoTime;
+	String time;
 	String thumbnail;
 	List<CommentInfo> commentList;
 	
@@ -38,5 +40,16 @@ public class VideoInfo {
 	public void setCommentList(List<CommentInfo> commentList) {
 		this.commentList = commentList;
 	}
-	
+	public String getVideoTime() {
+		return videoTime;
+	}
+	public void setVideoTime(String videoTime) {
+		this.videoTime = videoTime;
+	}
+	public String getTime() {
+		return time;
+	}
+	public void setTime(String time) {
+		this.time = time;
+	}
 }

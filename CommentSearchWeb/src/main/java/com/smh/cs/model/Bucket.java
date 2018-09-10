@@ -13,6 +13,8 @@ public class Bucket {
 	
 	String doc_count;
 
+	Dedup_docs dedup_docs;
+	
 	public String getKey() {
 		return key;
 	}
@@ -35,5 +37,13 @@ public class Bucket {
 
 	public void setDoc_count(String doc_count) {
 		this.doc_count = doc_count;
+	}
+
+	public Dedup_docs getDedup_docs() {
+		return dedup_docs;
+	}
+
+	public void setDedup_docs(Dedup_docs dedup_docs) {
+		this.dedup_docs = dedup_docs;
 	}
 }
