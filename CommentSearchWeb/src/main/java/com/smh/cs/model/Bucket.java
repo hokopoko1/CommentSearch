@@ -15,6 +15,8 @@ public class Bucket {
 
 	Dedup_docs dedup_docs;
 	
+	Maxscore max_score;
+	
 	public String getKey() {
 		return key;
 	}
@@ -46,4 +48,13 @@ public class Bucket {
 	public void setDedup_docs(Dedup_docs dedup_docs) {
 		this.dedup_docs = dedup_docs;
 	}
+
+	public Maxscore getMax_score() {
+		return max_score;
+	}
+
+	public void setMax_score(Maxscore max_score) {
+		this.max_score = max_score;
+	}
+	
 }

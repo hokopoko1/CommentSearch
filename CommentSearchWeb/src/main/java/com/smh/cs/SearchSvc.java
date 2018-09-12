@@ -120,6 +120,10 @@ public class SearchSvc {
 		
 		JSONObject aggs = new JSONObject();
 		JSONObject aggsh = new JSONObject();
+		JSONObject max_score = new JSONObject();
+		
+		JSONObject max_score2 = new JSONObject();
+		JSONObject script = new JSONObject();
 		
 		fieldData.add("title");
 		fieldData.add("comment");
@@ -130,11 +134,19 @@ public class SearchSvc {
 		query.put("multi_match", multi_match);
 		
 		terms.put("field", "videoTime");
+		terms.put("size", "20");
+		
+		max_score.put("max_score", "desc");
+		terms.put("order", max_score);
 		
 		top_hits.put("size", "1");
 		dedup_docs.put("top_hits", top_hits);
+		
+		script.put("script", "_score");
+		max_score2.put("max", script);
+		aggs.put("max_score", max_score2);
 		aggs.put("dedup_docs", dedup_docs);
-
+		
 		dedup.put("terms", terms);
 		dedup.put("aggs", aggs);
 		
@@ -231,7 +243,7 @@ public class SearchSvc {
 				search.setMaxResults(50L);
 			}
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
-			search.setEventType("completed");
+//			search.setEventType("completed");
 			/*
 			 * We are only searching for videos (not playlists or channels). If we were
 			 * searching for more, we would add them as a string like this:
