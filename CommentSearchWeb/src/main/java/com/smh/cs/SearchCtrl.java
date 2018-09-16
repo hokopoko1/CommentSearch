@@ -79,7 +79,7 @@ public class SearchCtrl {
 		
 		CommentInfoDT rtn = new CommentInfoDT();
 		
-		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null, null);
+		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null, null, null);
 		rtn.setData(commentInfo);
 		
 		return rtn;

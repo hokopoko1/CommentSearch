@@ -13,6 +13,7 @@ public class VideoInfoLog {
 	String time;
 	String author;
 	String comment;
+	String description;
 	
 	public String getVideoId() {
 		return videoId;
@@ -49,6 +50,12 @@ public class VideoInfoLog {
 	}
 	public void setVideoTime(String videoTime) {
 		this.videoTime = videoTime;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 }

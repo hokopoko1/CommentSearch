@@ -127,6 +127,7 @@ public class SearchSvc {
 		
 		fieldData.add("title");
 		fieldData.add("comment");
+		fieldData.add("description");
 		
 		multi_match.put("query", keyword);
 		multi_match.put("fields", fieldData);
@@ -357,12 +358,14 @@ public class SearchSvc {
 				
 				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
 				
+				List<Video> videoResultList = Videos(rId.getVideoId());
+				
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
 				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
-				
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime()));
+				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -423,10 +426,10 @@ public class SearchSvc {
 		
 	}
 	
-	public List<Video> Videos(String videoId){
+	public static List<Video> Videos(String videoId){
 		Properties properties = new Properties();
 	    try {
-	      InputStream in = SearchTest.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	    	InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
 	      properties.load(in);
 
 	    } catch (IOException e) {
@@ -535,7 +538,7 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<CommentInfo> getComment(String videoId, String title, String videoTime) {
+	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description) {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -598,6 +601,7 @@ public class SearchSvc {
                     log.setTime(snippet.getPublishedAt().toString());
                     log.setAuthor(snippet.getAuthorDisplayName());
                     log.setComment(snippet.getTextDisplay());
+                    log.setDescription(description);
                     
                     commentInfoList.add(commentInfo);
                     
