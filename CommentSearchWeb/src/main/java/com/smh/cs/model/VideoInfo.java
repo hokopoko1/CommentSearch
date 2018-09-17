@@ -15,6 +15,7 @@ public class VideoInfo {
 	String time;
 	String thumbnail;
 	String description;
+	List<String> tags;
 	List<CommentInfo> commentList;
 	
 	public String getVideoId() {
@@ -58,6 +59,12 @@ public class VideoInfo {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public List<String> getTags() {
+		return tags;
+	}
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 	
 }

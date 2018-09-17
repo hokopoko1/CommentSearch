@@ -82,7 +82,7 @@ public class SearchSvc {
 	 * Global instance of the max number of videos we want returned (50 = upper
 	 * limit per page).
 	 */
-	private static final long NUMBER_OF_VIDEOS_RETURNED = 25;
+	private static final long NUMBER_OF_VIDEOS_RETURNED = 20;
 
 	/** Global instance of Youtube object to make all API requests. */
 	private static YouTube youtube;
@@ -240,9 +240,6 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
-			if("csearch".equals(mode)) {
-				search.setMaxResults(50L);
-			}
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 //			search.setEventType("completed");
 			/*
@@ -257,17 +254,37 @@ public class SearchSvc {
 			 */
 			//search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
 			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+			if("csearch".equals(mode)) {
+				search.setMaxResults(50L);
+			}
+			
+			if("live".equals(mode)) {
+				search.setMaxResults(1L);
+				search.setEventType("live");
+			}
+			
 			SearchListResponse searchResponse = search.execute();
 
 			List<SearchResult> searchResultList = searchResponse.getItems();
-
-			if (searchResultList != null) {
-				if( "csearch".equals(mode)) {
-					prettyPrintCsearch(searchResultList.iterator(), queryTerm, videoInfoList);
-				}else {
+			
+			if( "search".equals(mode) ) {
+				if (searchResultList != null) {
 					prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
 				}
-				
+			}else if( "live".equals(mode) ) {
+				if (searchResultList != null) {
+					prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
+				}
+			}
+			else {
+				for(int i=3 ; i>0 ; i--) {
+					if (searchResultList != null) {
+						prettyPrintCsearch(searchResultList.iterator(), queryTerm, videoInfoList);
+					}
+					search.setPageToken(searchResponse.getNextPageToken());
+					searchResponse = search.execute();
+					searchResultList = searchResponse.getItems();
+				}
 			}
 			
 		} catch (GoogleJsonResponseException e) {
@@ -365,6 +382,54 @@ public class SearchSvc {
 				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
 				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+				tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription()));
+				
+				videoInfoList.add(tmpVideo);
+			}
+		}
+	}
+	
+	private static void prettyPrintCsearchLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+
+		System.out.println("\n=============================================================");
+		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+		System.out.println("=============================================================\n");
+
+		if (!iteratorSearchResults.hasNext()) {
+			System.out.println(" There aren't any results for your query.");
+		}
+		
+		while (iteratorSearchResults.hasNext()) {
+
+			SearchResult singleVideo = iteratorSearchResults.next();
+			ResourceId rId = singleVideo.getId();
+
+			VideoInfo tmpVideo = new VideoInfo();
+			
+			// Double checks the kind is video.
+			if (rId.getKind().equals("youtube#video")) {
+				// Thumbnail thumbnail =
+				// singleVideo.getSnippet().getThumbnails().get("default");
+
+				System.out.println(" Video Id: " + rId.getVideoId());
+				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
+				System.out.println("\n-------------------------------------------------------------\n");
+				
+				logger.debug(rId.getVideoId());
+				logger.debug(singleVideo.getSnippet().getTitle());
+				
+				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
+				
+				List<Video> videoResultList = Videos(rId.getVideoId());
+				
+				tmpVideo.setVideoId(rId.getVideoId());
+				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
+				tmpVideo.setThumbnail(thumbnail);
+				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+				tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
 				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription()));
 				
 				videoInfoList.add(tmpVideo);
@@ -617,7 +682,7 @@ public class SearchSvc {
             		}
                 }
                 CommentThread firstComment = videoComments.get(0);
-
+ 
                 // Will use this thread as parent to new reply.
                 String parentId = firstComment.getId();
 

@@ -45,6 +45,20 @@ public class SearchCtrl {
 		return "home";
 	}
 	
+	@RequestMapping(value = "/live", method = RequestMethod.GET)
+	public String live(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "live";
+	}
+	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
 	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
@@ -65,6 +79,22 @@ public class SearchCtrl {
 		
 		if( "true".equals(learning) ) {
 			searchSvc.searchVideo(keyword, "csearch");
+		}
+		
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword);
+		rtn.setData(videoInfo);
+		
+		return rtn;
+	}
+	
+	@RequestMapping(value = "/csearchVideoLive", method = RequestMethod.POST)
+	public @ResponseBody VideoInfoDT csearchVideoLive(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, Locale locale, Model model) throws IOException, ParseException {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		VideoInfoDT rtn = new VideoInfoDT();
+		
+		if( "true".equals(learning) ) {
+			searchSvc.searchVideo(keyword, "live");
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword);
