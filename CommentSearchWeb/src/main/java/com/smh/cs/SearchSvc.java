@@ -1,6 +1,7 @@
 package com.smh.cs;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.TimeZone;
 
 import org.apache.http.HttpHost;
@@ -252,6 +254,14 @@ public class SearchSvc {
 			// Get query term from user.
 //			String queryTerm = getInputQuery();
 
+			
+			File txt = new File(SearchSvc.class.getResource("/wordlist.txt").getFile());
+			Scanner scan = new Scanner(txt);
+			ArrayList<String> testData = new ArrayList<String>() ;
+			while(scan.hasNextLine()){
+				testData.add(scan.nextLine());
+			}
+			
 			String queryTerm = keyword;
 			
 			YouTube.Search.List search = youtube.search().list("id,snippet");
@@ -263,6 +273,8 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
+			search.setVideoDuration("short");
+			search.setOrder("rating");
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 //			search.setEventType("completed");
 			/*
@@ -273,7 +285,7 @@ public class SearchSvc {
 			search.setType("video");
 			
 			String timeStr = "2018-09-01T00:00:00Z";
-			String timeEnd = "2018-09-10T00:00:00Z";
+			String timeEnd = "2018-09-02T00:00:00Z";
 		    DateTime startDateTime = DateTime.parseRfc3339(timeStr);
 		    DateTime endDateTime = DateTime.parseRfc3339(timeEnd);
 			search.setPublishedAfter(startDateTime);
@@ -286,35 +298,40 @@ public class SearchSvc {
 			//search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
 			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
 			if("csearch".equals(mode)) {
-				search.setMaxResults(50L);
+				search.setMaxResults(1L);
 			}
 			
 			if("live".equals(mode)) {
 				search.setMaxResults(1L);
 				search.setEventType("live");
 			}
-			
-			SearchListResponse searchResponse = search.execute();
-
-			List<SearchResult> searchResultList = searchResponse.getItems();
-			
-			if( "search".equals(mode) ) {
-				if (searchResultList != null) {
-					prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
-				}
-			}else if( "live".equals(mode) ) {
-				if (searchResultList != null) {
-					prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
-				}
-			}
-			else {
-				for(int i=3 ; i>0 ; i--) {
+			for(String testKeywork: testData) {
+				
+				search.setQ(testKeywork);
+				
+				SearchListResponse searchResponse = search.execute();
+	
+				List<SearchResult> searchResultList = searchResponse.getItems();
+				
+				if( "search".equals(mode) ) {
 					if (searchResultList != null) {
-						prettyPrintCsearch(searchResultList.iterator(), queryTerm, videoInfoList);
+						prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
 					}
-					search.setPageToken(searchResponse.getNextPageToken());
-					searchResponse = search.execute();
-					searchResultList = searchResponse.getItems();
+				}else if( "live".equals(mode) ) {
+					if (searchResultList != null) {
+						prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
+					}
+				}
+				else {
+	//				for(int i=1 ; i>0 ; i--) {
+					
+						if (searchResultList != null) {
+							prettyPrintCsearch(searchResultList.iterator(), queryTerm, videoInfoList);
+						}
+						search.setPageToken(searchResponse.getNextPageToken());
+						searchResponse = search.execute();
+						searchResultList = searchResponse.getItems();
+	//				}
 				}
 			}
 			
