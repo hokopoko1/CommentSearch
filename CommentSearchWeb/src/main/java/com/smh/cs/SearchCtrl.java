@@ -45,7 +45,7 @@ public class SearchCtrl {
 		return "home";
 	}
 	
-	@RequestMapping(value = "/live", method = RequestMethod.GET)
+	@RequestMapping(value = "/comparison", method = RequestMethod.GET)
 	public String live(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
@@ -56,7 +56,7 @@ public class SearchCtrl {
 		
 		model.addAttribute("serverTime", formattedDate );
 		
-		return "live";
+		return "comparison";
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
@@ -81,7 +81,23 @@ public class SearchCtrl {
 			searchSvc.searchVideo(keyword, "csearch");
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
+		rtn.setData(videoInfo);
+		
+		return rtn;
+	}
+	
+	@RequestMapping(value = "/csearchVideoNoComment", method = RequestMethod.POST)
+	public @ResponseBody VideoInfoDT csearchVideoNoComment(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, Locale locale, Model model) throws IOException, ParseException {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		VideoInfoDT rtn = new VideoInfoDT();
+		
+		if( "true".equals(learning) ) {
+			searchSvc.searchVideo(keyword, "csearch");
+		}
+		
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment");
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -97,7 +113,7 @@ public class SearchCtrl {
 			searchSvc.searchVideo(keyword, "live");
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -115,4 +131,18 @@ public class SearchCtrl {
 		return rtn;
 	}
 	
+	@RequestMapping(value = "/downloadCaption", method = RequestMethod.POST)
+	public @ResponseBody String downloadCaption(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		
+		try {
+			searchSvc.downloadCaption("SNAp0DEW4cBQq4MdAefKbd61OXkHsppPPDJtY_8PUg4=");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
 }

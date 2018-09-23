@@ -40,8 +40,9 @@
 		csearch();
 		
 		var keyword = document.getElementById("search").value;
-		var uri="/searchVideo";  
-	    var params="?keyword="+keyword;  
+		var learning = document.getElementById("learning").checked?"true":"false";
+		var uri="/csearchVideoNoComment";  
+		var params="?keyword="+keyword+"&learning="+learning;  
 	    
 	    var oTable = $('#dataTables').DataTable({
 	    	"processing" : true,
@@ -67,7 +68,8 @@
 	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
-	    		{ title: "title", data:"title" }
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
 	    	]
 	    	
 	    });
@@ -105,7 +107,8 @@
 	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
-	    		{ title: "title", data:"title" }
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
 	    	]
 	    	
 	    });
@@ -200,8 +203,8 @@
 							<ul class="nav side-menu">
 								<li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
 									<ul class="nav child_menu">
-										<li><a href="">complete</a></li>
-										<li><a href="live">live</a></li>
+										<li><a href="${pageContext.request.contextPath}/">complete</a></li>
+										<li><a href="${pageContext.request.contextPath}/comparison">comparison</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -255,13 +258,13 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearch();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search();}"/>
 			                        </div>
-									<button type="submit" onclick="csearch();" class="btn btn-success">Submit</button>
+									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="">
 		                            <label>
-		                              <input type="checkbox" id="learning" class="js-switch" checked /> learning
+		                              <input type="checkbox" id="learning" class="js-switch" /> learning
 		                            </label>
 		                        </div>
 								<!-- 

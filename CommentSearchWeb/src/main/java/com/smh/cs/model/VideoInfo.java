@@ -15,6 +15,7 @@ public class VideoInfo {
 	String time;
 	String thumbnail;
 	String description;
+	String score;
 	List<String> tags;
 	List<CommentInfo> commentList;
 	
@@ -65,6 +66,12 @@ public class VideoInfo {
 	}
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+	public String getScore() {
+		return score;
+	}
+	public void setScore(String score) {
+		this.score = score;
 	}
 	
 }

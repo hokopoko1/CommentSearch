@@ -1,14 +1,22 @@
 package com.smh.cs;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
@@ -34,14 +42,20 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.googleapis.media.MediaHttpDownloader;
+import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
+
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.YouTube.Captions.Download;
 import com.google.api.services.youtube.model.Comment;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThread;
@@ -61,6 +75,7 @@ import com.smh.cs.model.ResponseHits;
 import com.smh.cs.model.Return;
 import com.smh.cs.model.VideoInfo;
 import com.smh.cs.model.VideoInfoLog;
+import com.smh.util.Auth;
 
 @Component
 public class SearchSvc {
@@ -83,6 +98,11 @@ public class SearchSvc {
 	 * limit per page).
 	 */
 	private static final long NUMBER_OF_VIDEOS_RETURNED = 20;
+	
+	/**
+     * Define a global variable that specifies the caption download format.
+     */
+    private static final String SRT = "srt";
 
 	/** Global instance of Youtube object to make all API requests. */
 	private static YouTube youtube;
@@ -93,7 +113,7 @@ public class SearchSvc {
 	@Autowired
 	SearchDao searchDao;
 	
-	public List<VideoInfo> csearchVideo(String keyword) throws IOException {
+	public List<VideoInfo> csearchVideo(String keyword, String mode) throws IOException {
 		//TODO:
 //		HttpHeaders headers = new HttpHeaders();
 //		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -126,7 +146,9 @@ public class SearchSvc {
 		JSONObject script = new JSONObject();
 		
 		fieldData.add("title");
-		fieldData.add("comment");
+		if( "comment".equals(mode) ) {
+			fieldData.add("comment");
+		}
 		fieldData.add("description");
 		
 		multi_match.put("query", keyword);
@@ -191,6 +213,7 @@ public class SearchSvc {
 				tmpVideoInfo.setVideoId(hit.getSource().getVideoId());
 				tmpVideoInfo.setTitle(hit.getSource().getTitle());
 				tmpVideoInfo.setTime(hit.getSource().getTime());
+				tmpVideoInfo.setScore(hit.getScore().toString());
 				tmpVideoInfo.setThumbnail(thumbnail);
 				
 				csearchList.add(tmpVideoInfo);
@@ -248,6 +271,14 @@ public class SearchSvc {
 			 * "video,playlist,channel".
 			 */
 			search.setType("video");
+			
+			String timeStr = "2018-09-01T00:00:00Z";
+			String timeEnd = "2018-09-10T00:00:00Z";
+		    DateTime startDateTime = DateTime.parseRfc3339(timeStr);
+		    DateTime endDateTime = DateTime.parseRfc3339(timeEnd);
+			search.setPublishedAfter(startDateTime);
+			search.setPublishedBefore(endDateTime);
+			
 			/*
 			 * This method reduces the info returned to only the fields we need and makes
 			 * calls more efficient.
@@ -731,5 +762,71 @@ public class SearchSvc {
     
         return text;
     }
-	
+
+    public static void downloadCaption(String captionId) throws IOException {
+        // Create an API request to the YouTube Data API's captions.download
+        // method to download an existing caption track.
+      	 Properties properties = new Properties();
+   	    try {
+   	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+   	      properties.load(in);
+
+   	    } catch (IOException e) {
+   	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+   	          + " : " + e.getMessage());
+   	      System.exit(1);
+   	    }
+   	    
+		List<String> scopes = Lists.newArrayList("https://www.googleapis.com/auth/youtube.force-ssl");
+		Credential credential = Auth.authorize(scopes, "captions");
+
+		// This object is used to make YouTube Data API requests.
+		youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+				.setApplicationName("youtube-cmdline-captions-sample").build();
+   	    
+      	String apiKey = properties.getProperty("youtube.apikey");
+        Download captionDownload = youtube.captions().download(captionId).setTfmt(SRT).setKey(apiKey);
+        
+        // Set the download type and add an event listener.
+        MediaHttpDownloader downloader = captionDownload.getMediaHttpDownloader();
+
+        // Indicate whether direct media download is enabled. A value of
+        // "True" indicates that direct media download is enabled and that
+        // the entire media content will be downloaded in a single request.
+        // A value of "False," which is the default, indicates that the
+        // request will use the resumable media download protocol, which
+        // supports the ability to resume a download operation after a
+        // network interruption or other transmission failure, saving
+        // time and bandwidth in the event of network failures.
+//        downloader.setDirectDownloadEnabled(false);
+
+        // Set the download state for the caption track file.
+        MediaHttpDownloaderProgressListener downloadProgressListener = new MediaHttpDownloaderProgressListener() {
+            @Override
+            public void progressChanged(MediaHttpDownloader downloader) throws IOException {
+                switch (downloader.getDownloadState()) {
+                    case MEDIA_IN_PROGRESS:
+                        System.out.println("Download in progress");
+                        System.out.println("Download percentage: " + downloader.getProgress());
+                        break;
+                    // This value is set after the entire media file has
+                    //  been successfully downloaded.
+                    case MEDIA_COMPLETE:
+                        System.out.println("Download Completed!");
+                        break;
+                    // This value indicates that the download process has
+                    //  not started yet.
+                    case NOT_STARTED:
+                        System.out.println("Download Not Started!");
+                        break;
+                }
+            }
+        };
+        downloader.setProgressListener(downloadProgressListener);
+
+        OutputStream outputFile = new FileOutputStream("captionFile.srt");
+        // Download the caption track.
+        captionDownload.executeAndDownloadTo(outputFile);
+      }
+    
 }

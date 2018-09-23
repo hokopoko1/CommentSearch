@@ -28,6 +28,8 @@
     
     <link href="/resources/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet">
 
+	<!-- bootstrap-datetimepicker -->
+    <link href="/resources/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css" rel="stylesheet">
     <!-- Custom Theme Style -->
     <link href="/resources/custom/css/custom.min.css" rel="stylesheet">
 	
@@ -36,10 +38,15 @@
 	
 	<script type="text/javascript">
 	
+	$('#reservation-time').datetimepicker({
+        format: 'DD.MM.YYYY'
+    });
+	
 	function search(){
 		csearch();
 		
 		var keyword = document.getElementById("search").value;
+		
 		var uri="/searchVideo";  
 	    var params="?keyword="+keyword;  
 	    
@@ -110,6 +117,39 @@
 	    	
 	    });
 
+	}
+	
+	function downloadCaption(){
+		var uri="/downloadCaption";  
+	    
+		var oTable = $('#csearchTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(oData["videoId"], sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" }
+	    	]
+	    	
+	    });
 	}
 	
 	function makeVideoId(videoId){
@@ -200,8 +240,8 @@
 							<ul class="nav side-menu">
 								<li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
 									<ul class="nav child_menu">
-										<li><a href="">complete</a></li>
-										<li><a href="live">live</a></li>
+										<li><a href="${pageContext.request.contextPath}/">complete</a></li>
+										<li><a href="${pageContext.request.contextPath}/comparison">comparison</a></li>
 									</ul>
 								</li>
 							</ul>
@@ -255,13 +295,13 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search()();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search();}"/>
 			                        </div>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
-								<div class="">
+								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>
-		                              <input type="checkbox" id="learning" class="js-switch" checked /> learning
+		                              <input type="checkbox" id="learning" class="js-switch" /> learning
 		                            </label>
 		                        </div>
 								<!-- 
@@ -363,6 +403,9 @@
     <script src="/resources/vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js"></script>
     <!-- starrr -->
     <script src="/resources/vendors/starrr/dist/starrr.js"></script>
+    
+    <script src="/resources/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    
     <!-- Custom Theme Scripts -->
     <script src="/resources/custom/js/custom.min.js"></script>
     <script src="/resources/vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
