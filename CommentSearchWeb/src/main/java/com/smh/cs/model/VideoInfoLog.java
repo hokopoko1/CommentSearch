@@ -14,6 +14,7 @@ public class VideoInfoLog {
 	String author;
 	String comment;
 	String description;
+	String viewCount;
 	
 	public String getVideoId() {
 		return videoId;
@@ -56,6 +57,12 @@ public class VideoInfoLog {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public String getViewCount() {
+		return viewCount;
+	}
+	public void setViewCount(String viewCount) {
+		this.viewCount = viewCount;
 	}
 	
 }

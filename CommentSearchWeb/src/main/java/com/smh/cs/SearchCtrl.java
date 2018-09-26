@@ -65,20 +65,22 @@ public class SearchCtrl {
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search");
+		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search", null, null);
 		rtn.setData(videoInfo);
 		
 		return rtn;
 	}
 	
 	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, Locale locale, Model model) throws IOException, ParseException {
+	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, 
+			@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate,
+			Locale locale, Model model) throws IOException, ParseException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
 		if( "true".equals(learning) ) {
-			searchSvc.searchVideo(keyword, "csearch");
+			searchSvc.searchVideo(keyword, "csearch", startDate, endDate);
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
@@ -94,7 +96,7 @@ public class SearchCtrl {
 		VideoInfoDT rtn = new VideoInfoDT();
 		
 		if( "true".equals(learning) ) {
-			searchSvc.searchVideo(keyword, "csearch");
+			searchSvc.searchVideo(keyword, "csearch", null, null);
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment");
@@ -110,7 +112,7 @@ public class SearchCtrl {
 		VideoInfoDT rtn = new VideoInfoDT();
 		
 		if( "true".equals(learning) ) {
-			searchSvc.searchVideo(keyword, "live");
+			searchSvc.searchVideo(keyword, "live", null, null);
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
@@ -125,7 +127,7 @@ public class SearchCtrl {
 		
 		CommentInfoDT rtn = new CommentInfoDT();
 		
-		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null, null, null);
+		List<CommentInfo> commentInfo =  searchSvc.getComment(videoId, null, null, null, null);
 		rtn.setData(commentInfo);
 		
 		return rtn;

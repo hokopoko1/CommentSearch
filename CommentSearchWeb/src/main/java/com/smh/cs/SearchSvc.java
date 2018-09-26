@@ -226,7 +226,7 @@ public class SearchSvc {
 	}
 	
 	
-	public List<VideoInfo> searchVideo(String keyword, String mode) {
+	public List<VideoInfo> searchVideo(String keyword, String mode, String startDate, String endDate) {
 		
 		Properties properties = new Properties();
 	    try {
@@ -273,8 +273,9 @@ public class SearchSvc {
 			String apiKey = properties.getProperty("youtube.apikey");
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
-			search.setVideoDuration("short");
+			//search.setVideoDuration("short");
 			search.setOrder("rating");
+			search.setRegionCode("US");
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 //			search.setEventType("completed");
 			/*
@@ -284,12 +285,14 @@ public class SearchSvc {
 			 */
 			search.setType("video");
 			
-			String timeStr = "2018-09-01T00:00:00Z";
-			String timeEnd = "2018-09-02T00:00:00Z";
-		    DateTime startDateTime = DateTime.parseRfc3339(timeStr);
-		    DateTime endDateTime = DateTime.parseRfc3339(timeEnd);
-			search.setPublishedAfter(startDateTime);
-			search.setPublishedBefore(endDateTime);
+			if( startDate != null) {
+//				startDate = "2018-09-10T00:00:00Z";
+//				endDate = "2018-09-11T00:00:00Z";
+			    DateTime startDateTime = DateTime.parseRfc3339(startDate);
+			    DateTime endDateTime = DateTime.parseRfc3339(endDate);
+				search.setPublishedAfter(startDateTime);
+				search.setPublishedBefore(endDateTime);
+			}
 			
 			/*
 			 * This method reduces the info returned to only the fields we need and makes
@@ -305,7 +308,12 @@ public class SearchSvc {
 				search.setMaxResults(1L);
 				search.setEventType("live");
 			}
+			
+			int w=0;
+			
 			for(String testKeywork: testData) {
+				
+				System.out.println("====================>" + w++);
 				
 				search.setQ(testKeywork);
 				
@@ -429,9 +437,13 @@ public class SearchSvc {
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
 				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
-				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
-				tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription()));
+				
+				if(videoResultList != null && !videoResultList.isEmpty()) {
+					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
+					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
+				}
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -477,8 +489,9 @@ public class SearchSvc {
 				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
 				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+				tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
 				tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription()));
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -651,7 +664,7 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description) {
+	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, String viewCount) {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -715,13 +728,14 @@ public class SearchSvc {
                     log.setAuthor(snippet.getAuthorDisplayName());
                     log.setComment(snippet.getTextDisplay());
                     log.setDescription(description);
+                    log.setViewCount(viewCount);
                     
                     commentInfoList.add(commentInfo);
                     
                     try {
                     	requestEntity = new HttpEntity<Object>(log, headers);
                     	
-                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/csearch/1/", HttpMethod.POST, requestEntity, String.class);
+                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/test/1/", HttpMethod.POST, requestEntity, String.class);
                     	
             			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
             		} catch (JsonProcessingException e) {

@@ -16,6 +16,7 @@ public class VideoInfo {
 	String thumbnail;
 	String description;
 	String score;
+	String viewCount;
 	List<String> tags;
 	List<CommentInfo> commentList;
 	
@@ -72,6 +73,12 @@ public class VideoInfo {
 	}
 	public void setScore(String score) {
 		this.score = score;
+	}
+	public String getViewCount() {
+		return viewCount;
+	}
+	public void setViewCount(String viewCount) {
+		this.viewCount = viewCount;
 	}
 	
 }

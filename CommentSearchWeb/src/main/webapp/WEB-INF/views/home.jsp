@@ -84,9 +84,11 @@
 	function csearch(){
 		var keyword = document.getElementById("search").value;
 		var learning = document.getElementById("learning").checked?"true":"false";
+		var startDate = document.getElementById("startDate").value;
+		var endDate = document.getElementById("endDate").value;
 		
 		var uri="/csearchVideo";  
-	    var params="?keyword="+keyword+"&learning="+learning;  
+	    var params="?keyword="+keyword+"&learning="+learning+"&startDate="+startDate+"&endDate="+endDate;  
 	    
 	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
@@ -303,6 +305,10 @@
 		                            <label>
 		                              <input type="checkbox" id="learning" class="js-switch" /> learning
 		                            </label>
+		                        </div>
+		                        <div class="col-md-6 col-sm-6 col-xs-12">
+		                            <input type="text" id="startDate" value="2018-09-01T00:00:00Z" />
+		                            <input type="text" id="endDate" value="2018-09-02T00:00:00Z" />
 		                        </div>
 								<!-- 
 								<div class="x_content">
