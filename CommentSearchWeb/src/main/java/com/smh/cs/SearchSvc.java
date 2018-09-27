@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -455,7 +456,7 @@ public class SearchSvc {
 				if(videoResultList != null && !videoResultList.isEmpty()) {
 					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
 					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
-					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
+					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
 					
 				}
 				tmpVideo.setChatList(getLiveChat(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), videoResultList));
@@ -507,9 +508,10 @@ public class SearchSvc {
 				if(videoResultList != null && !videoResultList.isEmpty()) {
 					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
 					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
-					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
+					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
+					tmpVideo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
 				}
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount()));
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), tmpVideo.getCommentCount()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -555,9 +557,10 @@ public class SearchSvc {
 				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
 				tmpVideo.setThumbnail(thumbnail);
 				tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
-				tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
+				tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
+				tmpVideo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
 				tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
-				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount()));
+				tmpVideo.setCommentList(getComment(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), tmpVideo.getCommentCount()));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -691,7 +694,7 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, String viewCount, List<Video> videoResultList) {
+	static public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, BigInteger viewCount, List<Video> videoResultList) {
 		
 		List<ChatInfo> chatInfoList = new ArrayList<ChatInfo>();
 		
@@ -739,7 +742,7 @@ public class SearchSvc {
         return chatInfoList;
 	}
 	
-	private static void listChatMessages(String videoId, String title, String videoTime, String description, String viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
+	private static void listChatMessages(String videoId, String title, String videoTime, String description, BigInteger viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 			// Get chat messages from YouTube
@@ -784,7 +787,7 @@ public class SearchSvc {
 			}
 	}
 	
-	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, String viewCount) {
+	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, BigInteger viewCount, BigInteger commentCount) {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -849,6 +852,7 @@ public class SearchSvc {
                     log.setComment(snippet.getTextDisplay());
                     log.setDescription(description);
                     log.setViewCount(viewCount);
+                    log.setCommentCount(commentCount);
                     
                     commentInfoList.add(commentInfo);
                     

@@ -1,5 +1,7 @@
 package com.smh.cs.model;
 
+import java.math.BigInteger;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
@@ -14,7 +16,8 @@ public class VideoInfoLog {
 	String author;
 	String comment;
 	String description;
-	String viewCount;
+	BigInteger viewCount;
+	BigInteger commentCount;
 	String chat;
 	
 	public String getVideoId() {
@@ -59,17 +62,23 @@ public class VideoInfoLog {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getViewCount() {
-		return viewCount;
-	}
-	public void setViewCount(String viewCount) {
-		this.viewCount = viewCount;
-	}
 	public String getChat() {
 		return chat;
 	}
 	public void setChat(String chat) {
 		this.chat = chat;
+	}
+	public BigInteger getViewCount() {
+		return viewCount;
+	}
+	public void setViewCount(BigInteger viewCount) {
+		this.viewCount = viewCount;
+	}
+	public BigInteger getCommentCount() {
+		return commentCount;
+	}
+	public void setCommentCount(BigInteger commentCount) {
+		this.commentCount = commentCount;
 	}
 	
 }

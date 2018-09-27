@@ -1,5 +1,6 @@
 package com.smh.cs.model;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -16,7 +17,8 @@ public class VideoInfo {
 	String thumbnail;
 	String description;
 	String score;
-	String viewCount;
+	BigInteger viewCount;
+	BigInteger commentCount;
 	List<String> tags;
 	List<CommentInfo> commentList;
 	List<ChatInfo> chatList;
@@ -75,17 +77,23 @@ public class VideoInfo {
 	public void setScore(String score) {
 		this.score = score;
 	}
-	public String getViewCount() {
-		return viewCount;
-	}
-	public void setViewCount(String viewCount) {
-		this.viewCount = viewCount;
-	}
 	public List<ChatInfo> getChatList() {
 		return chatList;
 	}
 	public void setChatList(List<ChatInfo> chatList) {
 		this.chatList = chatList;
+	}
+	public BigInteger getViewCount() {
+		return viewCount;
+	}
+	public void setViewCount(BigInteger viewCount) {
+		this.viewCount = viewCount;
+	}
+	public BigInteger getCommentCount() {
+		return commentCount;
+	}
+	public void setCommentCount(BigInteger commentCount) {
+		this.commentCount = commentCount;
 	}
 	
 }
