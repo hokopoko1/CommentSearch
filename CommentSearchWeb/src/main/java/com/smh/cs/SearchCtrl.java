@@ -73,7 +73,7 @@ public class SearchCtrl {
 	
 	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
 	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, 
-			@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate,
+			@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("live") String live,
 			Locale locale, Model model) throws IOException, ParseException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
@@ -81,6 +81,8 @@ public class SearchCtrl {
 		
 		if( "true".equals(learning) ) {
 			searchSvc.searchVideo(keyword, "csearch", startDate, endDate);
+		} else if( "true".equals(live) ) {
+			searchSvc.searchVideo(keyword, "live", startDate, endDate);
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");

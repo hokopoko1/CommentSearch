@@ -15,6 +15,7 @@ public class VideoInfoLog {
 	String comment;
 	String description;
 	String viewCount;
+	String chat;
 	
 	public String getVideoId() {
 		return videoId;
@@ -63,6 +64,12 @@ public class VideoInfoLog {
 	}
 	public void setViewCount(String viewCount) {
 		this.viewCount = viewCount;
+	}
+	public String getChat() {
+		return chat;
+	}
+	public void setChat(String chat) {
+		this.chat = chat;
 	}
 	
 }

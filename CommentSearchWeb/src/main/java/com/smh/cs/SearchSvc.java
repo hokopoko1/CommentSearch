@@ -19,6 +19,8 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
@@ -57,11 +59,17 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.YouTubeScopes;
 import com.google.api.services.youtube.YouTube.Captions.Download;
 import com.google.api.services.youtube.model.Comment;
 import com.google.api.services.youtube.model.CommentSnippet;
 import com.google.api.services.youtube.model.CommentThread;
 import com.google.api.services.youtube.model.CommentThreadListResponse;
+import com.google.api.services.youtube.model.LiveChatMessage;
+import com.google.api.services.youtube.model.LiveChatMessageAuthorDetails;
+import com.google.api.services.youtube.model.LiveChatMessageListResponse;
+import com.google.api.services.youtube.model.LiveChatMessageSnippet;
+import com.google.api.services.youtube.model.LiveChatSuperChatDetails;
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
@@ -70,6 +78,7 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.common.collect.Lists;
 import com.smh.cs.dao.SearchDao;
 import com.smh.cs.model.Bucket;
+import com.smh.cs.model.ChatInfo;
 import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.Hit;
 import com.smh.cs.model.Hits;
@@ -94,6 +103,10 @@ public class SearchSvc {
 
 	/** Global instance of the JSON factory. */
 	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
+	
+	private static final String LIVE_CHAT_FIELDS = "items(authorDetails(channelId,displayName,isChatModerator,isChatOwner,isChatSponsor,"
+			+ "profileImageUrl),snippet(displayMessage,superChatDetails,publishedAt)),"
+			+ "nextPageToken,pollingIntervalMillis";
 
 	/**
 	 * Global instance of the max number of videos we want returned (50 = upper
@@ -265,6 +278,12 @@ public class SearchSvc {
 			String queryTerm = keyword;
 			
 			YouTube.Search.List search = youtube.search().list("id,snippet");
+			
+			if("live".equals(mode)) {
+				search.setMaxResults(1L);
+				search.setEventType("live");
+			}	
+			
 			/*
 			 * It is important to set your developer key from the Google Developer Console
 			 * for non-authenticated requests (found under the API Access tab at this link:
@@ -274,7 +293,7 @@ public class SearchSvc {
 			search.setKey(apiKey);
 			search.setQ(queryTerm);
 			//search.setVideoDuration("short");
-			search.setOrder("rating");
+			search.setOrder("viewCount");
 			search.setRegionCode("US");
 //			search.setChannelId("UChlgI3UHCOnwUGzWzbJ3H5w");
 //			search.setEventType("completed");
@@ -303,12 +322,7 @@ public class SearchSvc {
 			if("csearch".equals(mode)) {
 				search.setMaxResults(1L);
 			}
-			
-			if("live".equals(mode)) {
-				search.setMaxResults(1L);
-				search.setEventType("live");
-			}
-			
+					
 			int w=0;
 			
 			for(String testKeywork: testData) {
@@ -327,7 +341,7 @@ public class SearchSvc {
 					}
 				}else if( "live".equals(mode) ) {
 					if (searchResultList != null) {
-						prettyPrint(searchResultList.iterator(), queryTerm, videoInfoList);
+						prettyPrintLive(searchResultList.iterator(), queryTerm, videoInfoList);
 					}
 				}
 				else {
@@ -393,6 +407,58 @@ public class SearchSvc {
 				tmpVideo.setVideoId(rId.getVideoId());
 				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
 				tmpVideo.setThumbnail(thumbnail);
+				
+				videoInfoList.add(tmpVideo);
+			}
+		}
+	}
+	
+	private static void prettyPrintLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+
+		System.out.println("\n=============================================================");
+		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+		System.out.println("=============================================================\n");
+
+		if (!iteratorSearchResults.hasNext()) {
+			System.out.println(" There aren't any results for your query.");
+		}
+		
+		while (iteratorSearchResults.hasNext()) {
+
+			SearchResult singleVideo = iteratorSearchResults.next();
+			ResourceId rId = singleVideo.getId();
+
+			VideoInfo tmpVideo = new VideoInfo();
+			
+			// Double checks the kind is video.
+			if (rId.getKind().equals("youtube#video")) {
+				// Thumbnail thumbnail =
+				// singleVideo.getSnippet().getThumbnails().get("default");
+
+//				System.out.println(" Video Id: " + rId.getVideoId());
+//				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
+//				System.out.println("\n-------------------------------------------------------------\n");
+				
+				logger.debug(rId.getVideoId());
+				logger.debug(singleVideo.getSnippet().getTitle());
+
+				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
+				
+				List<Video> videoResultList = Videos(rId.getVideoId());
+				
+				tmpVideo.setVideoId(rId.getVideoId());
+				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
+				tmpVideo.setThumbnail(thumbnail);
+				
+				if(videoResultList != null && !videoResultList.isEmpty()) {
+					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
+					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount().toString());
+					
+				}
+				tmpVideo.setChatList(getLiveChat(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), videoResultList));
 				
 				videoInfoList.add(tmpVideo);
 			}
@@ -513,45 +579,6 @@ public class SearchSvc {
 		return inputQuery;
 	}
 	
-	public void getLiveChatInfo(){
-		
-		String channelId = "";
-		
-		List<SearchResult> searchResultList = Search(channelId);
-		
-		Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
-		
-		while (iteratorSearchResults.hasNext()) {
-
-	      SearchResult singleVideo = iteratorSearchResults.next();
-	      ResourceId rId = singleVideo.getId();
-
-	      // Double checks the kind is video.
-	      if (rId.getKind().equals("youtube#video")) {
-//		    Thumbnail thumbnail = singleVideo.getSnippet().getThumbnails().get("default");
-
-	        System.out.println(" Video Id" + rId.getVideoId());
-	        System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
-//		        System.out.println(" Thumbnail: " + thumbnail.getUrl());
-	        System.out.println("\n-------------------------------------------------------------\n");
-	       
-	        List<Video> videoResultList = Videos(rId.getVideoId());
-	        
-	        Iterator<Video> iteratorVideosResults = videoResultList.iterator();
-	        
-	        while(iteratorVideosResults.hasNext()){
-	        	
-	        	Video singleActiveVideo = iteratorVideosResults.next();
-	        	String liveChatId = singleActiveVideo.getLiveStreamingDetails().getActiveLiveChatId();
-	        	System.out.println(" liveChatId" + liveChatId);
-	        	
-	        }
-	        
-	      }
-	    }
-		
-	}
-	
 	public static List<Video> Videos(String videoId){
 		Properties properties = new Properties();
 	    try {
@@ -662,6 +689,99 @@ public class SearchSvc {
 	    }
 	    
 	    return searchResultList;
+	}
+	
+	static public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, String viewCount, List<Video> videoResultList) {
+		
+		List<ChatInfo> chatInfoList = new ArrayList<ChatInfo>();
+		
+		// Read the developer key from youtube.properties
+	    Properties properties = new Properties();
+	    try {
+	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      properties.load(in);
+
+	    } catch (IOException e) {
+	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+	          + " : " + e.getMessage());
+	      System.exit(1);
+	    }
+
+	    String apiKey = properties.getProperty("youtube.apikey");
+		// This OAuth 2.0 access scope allows for read-only access to the
+		// authenticated user's account, but not other types of account access.
+		List<String> scopes = Lists.newArrayList(YouTubeScopes.YOUTUBE_READONLY);
+
+		try {
+			youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+		        public void initialize(HttpRequest request) throws IOException {}
+		      }).setApplicationName("youtube-cmdline-search-sample").build();
+			
+			if( videoResultList!= null) {
+				String liveChatId = videoResultList.get(0).getLiveStreamingDetails().getActiveLiveChatId();
+
+				if (liveChatId != null) {
+					System.out.println("Live chat id: " + liveChatId);
+					listChatMessages(videoId, title, videoTime, description, viewCount, liveChatId, null, 0, apiKey, videoResultList);
+				} else {
+					System.err.println("Unable to find a live chat id");
+					//System.exit(1);
+				}
+				
+	            System.out.println("You chose " + videoId + " to subscribe.");
+			}
+			
+		} catch (Throwable t) {
+			System.err.println("Throwable: " + t.getMessage());
+			t.printStackTrace();
+		}
+            
+        return chatInfoList;
+	}
+	
+	private static void listChatMessages(String videoId, String title, String videoTime, String description, String viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+			// Get chat messages from YouTube
+			LiveChatMessageListResponse response;
+			
+			try {
+				response = youtube.liveChatMessages() .list(liveChatId, "snippet, authorDetails").setPageToken(nextPageToken).setKey(apiKey).setMaxResults(2000L)
+						.setFields(LIVE_CHAT_FIELDS).execute();
+	
+				// Display messages and super chat details
+				List<LiveChatMessage> messages = response.getItems();
+				VideoInfoLog log = new VideoInfoLog();
+				HttpEntity<Object> requestEntity = null;
+				
+				for (int i = 0; i < messages.size(); i++) {
+					LiveChatMessage message = messages.get(i);
+					LiveChatMessageSnippet snippet = message.getSnippet();
+	                
+					System.out.println("  - Time: " + snippet.getPublishedAt());
+	                System.out.println("  - Chat: " + snippet.getDisplayMessage());
+	                System.out
+	                        .println("\n-------------------------------------------------------------\n");
+	                
+	                log.setVideoId(videoId);
+	                log.setTitle(title);
+	                log.setVideoTime(videoTime);
+	                log.setTime(snippet.getPublishedAt().toString());
+	//	                    log.setAuthor(snippet.getAuthorDisplayName());
+	                log.setChat(snippet.getDisplayMessage());
+	                log.setDescription(description);
+	                log.setViewCount(viewCount);
+	                
+	                requestEntity = new HttpEntity<Object>(log, headers);
+					
+					ResponseEntity<String> responseLive = new RestTemplate().exchange("http://124.111.196.176:9200/live/1/", HttpMethod.POST, requestEntity, String.class);
+					
+	//						System.out.println(buildOutput(snippet.getPublishedAt(), snippet.getDisplayMessage(), message.getAuthorDetails(), snippet.getSuperChatDetails()));
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, String viewCount) {

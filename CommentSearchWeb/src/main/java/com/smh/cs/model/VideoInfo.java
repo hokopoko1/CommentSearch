@@ -19,6 +19,7 @@ public class VideoInfo {
 	String viewCount;
 	List<String> tags;
 	List<CommentInfo> commentList;
+	List<ChatInfo> chatList;
 	
 	public String getVideoId() {
 		return videoId;
@@ -79,6 +80,12 @@ public class VideoInfo {
 	}
 	public void setViewCount(String viewCount) {
 		this.viewCount = viewCount;
+	}
+	public List<ChatInfo> getChatList() {
+		return chatList;
+	}
+	public void setChatList(List<ChatInfo> chatList) {
+		this.chatList = chatList;
 	}
 	
 }
