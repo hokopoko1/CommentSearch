@@ -91,6 +91,17 @@ public class SearchCtrl {
 		return rtn;
 	}
 	
+	@RequestMapping(value = "/searchPop", method = RequestMethod.POST)
+	public @ResponseBody VideoInfoDT searchPop(Locale locale, Model model) throws IOException, ParseException {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		VideoInfoDT rtn = new VideoInfoDT();
+		
+		searchSvc.searchPop();
+		
+		return rtn;
+	}
+	
 	@RequestMapping(value = "/csearchVideoNoComment", method = RequestMethod.POST)
 	public @ResponseBody VideoInfoDT csearchVideoNoComment(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, Locale locale, Model model) throws IOException, ParseException {
 		logger.info("Welcome home! The client locale is {}.", locale);

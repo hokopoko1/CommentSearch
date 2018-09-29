@@ -323,7 +323,7 @@ public class SearchSvc {
 			if("csearch".equals(mode)) {
 				search.setMaxResults(1L);
 			}
-					
+			
 			int w=0;
 			
 			for(String testKeywork: testData) {
@@ -356,6 +356,100 @@ public class SearchSvc {
 						searchResultList = searchResponse.getItems();
 	//				}
 				}
+			}
+			
+		} catch (GoogleJsonResponseException e) {
+			System.err.println(
+					"There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
+		} catch (IOException e) {
+			System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		
+		//searchDao.addVideoInfo(videoInfoList.get(0));
+		//searchDao.selectVideoInfo();
+		
+		return videoInfoList;
+	}
+	
+	public List<VideoInfo> searchPop() {
+		
+		Properties properties = new Properties();
+	    try {
+	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      properties.load(in);
+
+	    } catch (IOException e) {
+	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+	          + " : " + e.getMessage());
+	      System.exit(1);
+	    }
+	    
+	    List<VideoInfo> videoInfoList = new ArrayList<VideoInfo>();
+		try {
+			/*
+			 * The YouTube object is used to make all API requests. The last argument is
+			 * required, but because we don't need anything initialized when the HttpRequest
+			 * is initialized, we override the interface and provide a no-op function.
+			 */
+			youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+				public void initialize(HttpRequest request) throws IOException {
+				}
+			}).setApplicationName("youtube-cmdline-search-sample").build();
+
+			// Get query term from user.
+//			String queryTerm = getInputQuery();
+
+			
+			File txt = new File(SearchSvc.class.getResource("/wordlist.txt").getFile());
+			Scanner scan = new Scanner(txt);
+			ArrayList<String> testData = new ArrayList<String>() ;
+			while(scan.hasNextLine()){
+				testData.add(scan.nextLine());
+			}
+			
+//			String queryTerm = keyword;
+			
+			YouTube.Search.List search = youtube.search().list("id,snippet");
+			
+			/*
+			 * It is important to set your developer key from the Google Developer Console
+			 * for non-authenticated requests (found under the API Access tab at this link:
+			 * code.google.com/apis/). This is good practice and increased your quota.
+			 */
+			String apiKey = properties.getProperty("youtube.apikey");
+			search.setKey(apiKey);
+			search.setOrder("viewCount");
+			search.setRegionCode("US");
+			/*
+			 * We are only searching for videos (not playlists or channels). If we were
+			 * searching for more, we would add them as a string like this:
+			 * "video,playlist,channel".
+			 */
+			search.setType("video");
+			
+			/*
+			 * This method reduces the info returned to only the fields we need and makes
+			 * calls more efficient.
+			 */
+			//search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+			search.setMaxResults(50L);
+			
+			int w=0;
+			SearchListResponse searchResponse = search.execute();
+			List<SearchResult> searchResultList = searchResponse.getItems();
+			
+			for(int i=0 ; i<6 ; i++) {
+				
+				System.out.println("====================>" + w++);
+				if (searchResultList != null) {
+					prettyPrintCsearch(searchResultList.iterator(), null, videoInfoList);
+				}
+				search.setPageToken(searchResponse.getNextPageToken());
+				searchResponse = search.execute();
+				searchResultList = searchResponse.getItems();
 			}
 			
 		} catch (GoogleJsonResponseException e) {
@@ -834,11 +928,11 @@ public class SearchSvc {
                 	
                     CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment()
                             .getSnippet();
-                    System.out.println("  - Time: " + snippet.getPublishedAt());
-                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
-                    System.out.println("  - Comment: " + snippet.getTextDisplay());
-                    System.out
-                            .println("\n-------------------------------------------------------------\n");
+//                    System.out.println("  - Time: " + snippet.getPublishedAt());
+//                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
+//                    System.out.println("  - Comment: " + snippet.getTextDisplay());
+//                    System.out
+//                            .println("\n-------------------------------------------------------------\n");
                     
                     commentInfo.setTime(snippet.getPublishedAt().toString());
                     commentInfo.setAuthor(snippet.getAuthorDisplayName());
@@ -859,7 +953,7 @@ public class SearchSvc {
                     try {
                     	requestEntity = new HttpEntity<Object>(log, headers);
                     	
-                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/test/1/", HttpMethod.POST, requestEntity, String.class);
+                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/pop/1/", HttpMethod.POST, requestEntity, String.class);
                     	
             			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
             		} catch (JsonProcessingException e) {
