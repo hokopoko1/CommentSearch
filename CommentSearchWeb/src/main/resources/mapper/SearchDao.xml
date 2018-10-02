@@ -15,8 +15,8 @@
 			)
 	</insert>
 	
-	<select id="selectVideoInfo">
-		SELECT * FROM video
+	<select id="selectVideoInfo" resultType="videoInfo">
+		SELECT id, video_id As videoId, video_title AS title FROM video_info
 	</select>
 
 </mapper>

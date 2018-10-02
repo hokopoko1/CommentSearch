@@ -18,6 +18,10 @@ public class VideoInfoLog {
 	String description;
 	BigInteger viewCount;
 	BigInteger commentCount;
+	int chatLength;
+	int commentLength;
+	int titleLength;
+	int descriptionLength;
 	String chat;
 	
 	public String getVideoId() {
@@ -79,6 +83,30 @@ public class VideoInfoLog {
 	}
 	public void setCommentCount(BigInteger commentCount) {
 		this.commentCount = commentCount;
+	}
+	public int getCommentLength() {
+		return commentLength;
+	}
+	public void setCommentLength(int i) {
+		this.commentLength = i;
+	}
+	public int getTitleLength() {
+		return titleLength;
+	}
+	public void setTitleLength(int titleLength) {
+		this.titleLength = titleLength;
+	}
+	public int getDescriptionLength() {
+		return descriptionLength;
+	}
+	public void setDescriptionLength(int descriptionLength) {
+		this.descriptionLength = descriptionLength;
+	}
+	public int getChatLength() {
+		return chatLength;
+	}
+	public void setChatLength(int chatLength) {
+		this.chatLength = chatLength;
 	}
 	
 }

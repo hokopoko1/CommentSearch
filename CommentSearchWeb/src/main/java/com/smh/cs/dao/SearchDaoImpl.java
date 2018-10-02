@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 
 import com.smh.cs.model.VideoInfo;
 
-@Component
+@Repository
 public class SearchDaoImpl implements SearchDao{
 	
-	@Autowired
+	@Inject
 	private SqlSession sqlSession;
 
 	public void setSqlSession(SqlSession sqlSession) {
@@ -29,7 +29,7 @@ public class SearchDaoImpl implements SearchDao{
 	}
 	
 	@Override
-	public void selectVideoInfo() {
-		sqlSession.selectOne(namespace + ".selectVideoInfo");
+	public List<VideoInfo> selectVideoInfo() {
+		return sqlSession.selectList(namespace + ".selectVideoInfo");
 	}
 }

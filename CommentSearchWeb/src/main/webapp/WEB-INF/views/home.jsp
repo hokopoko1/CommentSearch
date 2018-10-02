@@ -74,7 +74,8 @@
 	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
-	    		{ title: "title", data:"title" }
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
 	    	]
 	    	
 	    });
@@ -115,7 +116,8 @@
 	    					makeThumnail(oData["videoId"], sData)		
 	    				);}
 	    		},
-	    		{ title: "title", data:"title" }
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
 	    	]
 	    	
 	    });
@@ -339,9 +341,9 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){searchPop();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search();}"/>
 			                        </div>
-									<button type="submit" onclick="searchPop();" class="btn btn-success">Submit</button>
+									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>

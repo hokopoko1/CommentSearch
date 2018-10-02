@@ -173,7 +173,7 @@ public class SearchSvc {
 		query.put("multi_match", multi_match);
 		
 		terms.put("field", "videoTime");
-		terms.put("size", "20");
+		terms.put("size", "10");
 		
 		max_score.put("max_score", "desc");
 		terms.put("order", max_score);
@@ -201,7 +201,7 @@ public class SearchSvc {
 		
 		Request request = new Request(
 			    "POST",  
-			    "/csearch/1/_search");   
+			    "/comment30/1/_search");   
 		
 		String reqbody = requestBody.toJSONString();
 		
@@ -220,6 +220,11 @@ public class SearchSvc {
 		VideoInfo tmpVideoInfo = new VideoInfo();
 		String thumbnail = null;
 		
+		double sum = 0;
+		double avg = 0;
+		
+		int cnt=0;
+		
 		for( Bucket bucket : responseHits.getAggregations().getDedup().getBuckets() ) {
 			
 			tmpVideoInfo = new VideoInfo();
@@ -233,8 +238,14 @@ public class SearchSvc {
 				tmpVideoInfo.setThumbnail(thumbnail);
 				
 				csearchList.add(tmpVideoInfo);
+				
+				sum = sum + hit.getScore();
+				cnt++;
 			}
 		}
+		
+		avg = sum / cnt;
+		System.out.println("Avg " + mode + " = "  + avg);
 		
 		return csearchList;
 	}
@@ -441,7 +452,7 @@ public class SearchSvc {
 			SearchListResponse searchResponse = search.execute();
 			List<SearchResult> searchResultList = searchResponse.getItems();
 			
-			for(int i=0 ; i<6 ; i++) {
+			for(int i=0 ; i<60 ; i++) {
 				
 				System.out.println("====================>" + w++);
 				if (searchResultList != null) {
@@ -868,10 +879,13 @@ public class SearchSvc {
 	                log.setChat(snippet.getDisplayMessage());
 	                log.setDescription(description);
 	                log.setViewCount(viewCount);
+	                log.setTitleLength(title.length());
+	                log.setDescriptionLength(description.length());
+	                log.setChatLength(snippet.getDisplayMessage().length());
 	                
 	                requestEntity = new HttpEntity<Object>(log, headers);
 					
-					ResponseEntity<String> responseLive = new RestTemplate().exchange("http://124.111.196.176:9200/live/1/", HttpMethod.POST, requestEntity, String.class);
+					ResponseEntity<String> responseLive = new RestTemplate().exchange("http://124.111.196.176:9200/newlive/1/", HttpMethod.POST, requestEntity, String.class);
 					
 	//						System.out.println(buildOutput(snippet.getPublishedAt(), snippet.getDisplayMessage(), message.getAuthorDetails(), snippet.getSuperChatDetails()));
 				}
@@ -908,7 +922,7 @@ public class SearchSvc {
         	
             System.out.println("You chose " + videoId + " to subscribe.");
             CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
-                    .list("snippet").setKey(apiKey).setVideoId(videoId).setMaxResults(100L).setTextFormat("plainText").execute();
+                    .list("snippet").setKey(apiKey).setVideoId(videoId).setMaxResults(30L).setTextFormat("plainText").execute();
             List<CommentThread> videoComments = videoCommentsListResponse.getItems();
 
             if (videoComments.isEmpty()) {
@@ -947,13 +961,16 @@ public class SearchSvc {
                     log.setDescription(description);
                     log.setViewCount(viewCount);
                     log.setCommentCount(commentCount);
+                    log.setCommentLength(snippet.getTextDisplay().length());
+                    log.setTitleLength(title.length());
+                    log.setDescriptionLength(description.length());
                     
                     commentInfoList.add(commentInfo);
                     
                     try {
                     	requestEntity = new HttpEntity<Object>(log, headers);
                     	
-                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/pop/1/", HttpMethod.POST, requestEntity, String.class);
+                	    ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment30/1/", HttpMethod.POST, requestEntity, String.class);
                     	
             			SERVICE_LOGGER.info(new ObjectMapper().writeValueAsString(log));
             		} catch (JsonProcessingException e) {

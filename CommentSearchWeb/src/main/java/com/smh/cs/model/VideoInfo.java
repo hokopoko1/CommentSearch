@@ -10,6 +10,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VideoInfo {
 
+	String id;
 	String videoId;
 	String title;
 	String videoTime;
@@ -23,6 +24,12 @@ public class VideoInfo {
 	List<CommentInfo> commentList;
 	List<ChatInfo> chatList;
 	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public String getVideoId() {
 		return videoId;
 	}

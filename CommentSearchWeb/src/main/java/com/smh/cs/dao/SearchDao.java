@@ -11,5 +11,5 @@ public interface SearchDao {
 
 	public void addVideoInfo(VideoInfo videoInfoList);
 	
-	public void selectVideoInfo();
+	public List<VideoInfo> selectVideoInfo() throws Exception;
 }

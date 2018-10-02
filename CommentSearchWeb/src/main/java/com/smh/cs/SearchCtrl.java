@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.CommentInfoDT;
 import com.smh.cs.model.VideoInfo;
 import com.smh.cs.model.VideoInfoDT;
+import com.smh.cs.service.SearchService;
 
 @Controller
 public class SearchCtrl {
@@ -28,6 +31,9 @@ public class SearchCtrl {
 	 */
 	
 	private static final Logger logger = LoggerFactory.getLogger(SearchCtrl.class);
+	
+	@Inject
+	private SearchService service;
 	
 	SearchSvc searchSvc = new SearchSvc();
 	
@@ -60,12 +66,13 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) {
+	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) throws IOException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search", null, null);
+//		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search", null, null);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "tag");
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -74,16 +81,18 @@ public class SearchCtrl {
 	@RequestMapping(value = "/csearchVideo", method = RequestMethod.POST)
 	public @ResponseBody VideoInfoDT csearchVideo(@RequestParam("keyword") String keyword, @RequestParam("learning") String learning, 
 			@RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate, @RequestParam("live") String live,
-			Locale locale, Model model) throws IOException, ParseException {
+			Locale locale, Model model) throws Exception {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		if( "true".equals(learning) ) {
-			searchSvc.searchVideo(keyword, "csearch", startDate, endDate);
-		} else if( "true".equals(live) ) {
-			searchSvc.searchVideo(keyword, "live", startDate, endDate);
-		}
+//		if( "true".equals(learning) ) {
+//			searchSvc.searchVideo(keyword, "csearch", startDate, endDate);
+//		} else if( "true".equals(live) ) {
+//			searchSvc.searchVideo(keyword, "live", startDate, endDate);
+//		}
+
+		List<VideoInfo> videolist = service.selectVideoInfo();
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
 		rtn.setData(videoInfo);
