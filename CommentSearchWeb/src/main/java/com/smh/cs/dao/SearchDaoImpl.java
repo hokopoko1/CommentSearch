@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.VideoInfo;
 
 @Repository
@@ -24,12 +25,17 @@ public class SearchDaoImpl implements SearchDao{
 	private static final String namespace = "com.smh.cs.dao.SearchDao";
 	
 	@Override
-	public void addVideoInfo(VideoInfo videoInfoList) {
-		sqlSession.insert(namespace + ".addVideoInfo", videoInfoList);
+	public int addVideoInfo(VideoInfo videoInfo) {
+		return sqlSession.insert(namespace + ".addVideoInfo", videoInfo);
 	}
 	
 	@Override
 	public List<VideoInfo> selectVideoInfo() {
 		return sqlSession.selectList(namespace + ".selectVideoInfo");
+	}
+	
+	@Override
+	public int addCommentInfo(CommentInfo commentInfo) {
+		return sqlSession.insert(namespace + ".addCommentInfo", commentInfo);
 	}
 }

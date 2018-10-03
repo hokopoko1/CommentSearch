@@ -14,12 +14,15 @@ public class VideoInfo {
 	String videoId;
 	String title;
 	String videoTime;
+	String type;
 	String time;
 	String thumbnail;
 	String description;
 	String score;
 	BigInteger viewCount;
 	BigInteger commentCount;
+	int titleLength;
+	int descriptionLength;
 	List<String> tags;
 	List<CommentInfo> commentList;
 	List<ChatInfo> chatList;
@@ -59,6 +62,12 @@ public class VideoInfo {
 	}
 	public void setVideoTime(String videoTime) {
 		this.videoTime = videoTime;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	public String getTime() {
 		return time;
@@ -101,6 +110,18 @@ public class VideoInfo {
 	}
 	public void setCommentCount(BigInteger commentCount) {
 		this.commentCount = commentCount;
+	}
+	public int getTitleLength() {
+		return titleLength;
+	}
+	public void setTitleLength(int titleLength) {
+		this.titleLength = titleLength;
+	}
+	public int getDescriptionLength() {
+		return descriptionLength;
+	}
+	public void setDescriptionLength(int descriptionLength) {
+		this.descriptionLength = descriptionLength;
 	}
 	
 }

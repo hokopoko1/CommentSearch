@@ -151,6 +151,12 @@
 		</dependency>
 		
 		<dependency>
+		    <groupId>com.google.cloud</groupId>
+		    <artifactId>google-cloud-language</artifactId>
+		    <version>0.26.0-beta</version>
+		</dependency>
+		
+		<dependency>
 		    <groupId>com.google.apis</groupId>
 		    <artifactId>google-api-services-youtube</artifactId>
 		    <version>v3-rev204-1.24.1</version>

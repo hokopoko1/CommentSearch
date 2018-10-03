@@ -7,10 +7,22 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommentInfo {
 
+	String videoId;
 	String time;
 	String author;
 	String comment;
+	int commentLength;
+	String chat;
+	int chatLength;
+	float sentiment;
+	float magnitude;
 	
+	public String getVideoId() {
+		return videoId;
+	}
+	public void setVideoId(String videoId) {
+		this.videoId = videoId;
+	}
 	public String getTime() {
 		return time;
 	}
@@ -28,6 +40,36 @@ public class CommentInfo {
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	public int getCommentLength() {
+		return commentLength;
+	}
+	public void setCommentLength(int commentLength) {
+		this.commentLength = commentLength;
+	}
+	public float getSentiment() {
+		return sentiment;
+	}
+	public void setSentiment(float sentiment) {
+		this.sentiment = sentiment;
+	}
+	public float getMagnitude() {
+		return magnitude;
+	}
+	public void setMagnitude(float magnitude) {
+		this.magnitude = magnitude;
+	}
+	public String getChat() {
+		return chat;
+	}
+	public void setChat(String chat) {
+		this.chat = chat;
+	}
+	public int getChatLength() {
+		return chatLength;
+	}
+	public void setChatLength(int chatLength) {
+		this.chatLength = chatLength;
 	}
 	
 }

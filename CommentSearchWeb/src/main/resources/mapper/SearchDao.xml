@@ -3,20 +3,61 @@
 
 <mapper namespace="com.smh.cs.dao.SearchDao">
 	<insert id="addVideoInfo" parameterType="com.smh.cs.model.VideoInfo">
-		INSET IGNORE INTO
-			video(
+		INSERT IGNORE INTO
+			video_info(
 				video_id,
-				title
+				title,
+				video_time,
+				thumbnail,
+				type,
+				description,
+				view_count,
+				comment_count,
+				title_length,
+				description_length
 			)
 		VALUES
 			(
 				#{videoId},
-				#{title}		
+				#{title},
+				#{videoTime},
+				#{thumbnail},
+				#{type},
+				#{description},
+				#{viewCount},
+				#{commentCount},
+				#{titleLength},
+				#{descriptionLength}
 			)
 	</insert>
 	
+	<insert id="addCommentInfo" parameterType="com.smh.cs.model.CommentInfo">
+		INSERT IGNORE INTO
+			comment(
+				video_id,
+				author,
+				time,
+				comment,
+				comment_length,
+				chat,
+				chat_length
+			)
+		VALUES
+			(
+				#{videoId},
+				#{author},
+				#{time},
+				#{comment},
+				#{commentLength},
+				#{chat},
+				#{chatLength}
+			)
+	</insert>
+	                   
 	<select id="selectVideoInfo" resultType="videoInfo">
-		SELECT id, video_id As videoId, video_title AS title FROM video_info
+		SELECT id, video_id As videoId, title FROM video_info
 	</select>
+
+
 
 </mapper>

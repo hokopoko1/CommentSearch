@@ -23,6 +23,8 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.inject.Inject;
+
 import org.apache.http.HttpHost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
@@ -87,6 +89,7 @@ import com.smh.cs.model.ResponseHits;
 import com.smh.cs.model.Return;
 import com.smh.cs.model.VideoInfo;
 import com.smh.cs.model.VideoInfoLog;
+import com.smh.cs.service.SearchService;
 import com.smh.util.Auth;
 
 @Component
@@ -114,6 +117,8 @@ public class SearchSvc {
 	 * limit per page).
 	 */
 	private static final long NUMBER_OF_VIDEOS_RETURNED = 20;
+	
+	private SearchService service;
 	
 	/**
      * Define a global variable that specifies the caption download format.
@@ -571,7 +576,7 @@ public class SearchSvc {
 		}
 	}
 	
-	private static void prettyPrintCsearch(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+	public void prettyPrintCsearch(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
 
 		System.out.println("\n=============================================================");
 		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
@@ -623,7 +628,7 @@ public class SearchSvc {
 		}
 	}
 	
-	private static void prettyPrintCsearchLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+	public void prettyPrintCsearchLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
 
 		System.out.println("\n=============================================================");
 		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
@@ -895,12 +900,35 @@ public class SearchSvc {
 			}
 	}
 	
-	static public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, BigInteger viewCount, BigInteger commentCount) {
+	public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, BigInteger viewCount, BigInteger commentCount) {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		
 		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
+		
+		
+		VideoInfo videoInfo = new VideoInfo();
+		
+		videoInfo.setVideoId(videoId);
+		videoInfo.setTitle(title);
+		videoInfo.setVideoTime(videoTime);
+		videoInfo.setType("comment");
+		videoInfo.setDescription(description);
+		videoInfo.setViewCount(viewCount);
+		videoInfo.setCommentCount(commentCount);
+		videoInfo.setTitleLength(title.length());
+		videoInfo.setDescriptionLength(description.length());
+		
+		try {
+			
+			List<VideoInfo> test = service.selectVideoInfo();
+			
+			service.addVideoInfo(videoInfo);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
         try {
     	    Properties properties = new Properties();
