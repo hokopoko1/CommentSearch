@@ -38,4 +38,14 @@ public class SearchDaoImpl implements SearchDao{
 	public int addCommentInfo(CommentInfo commentInfo) {
 		return sqlSession.insert(namespace + ".addCommentInfo", commentInfo);
 	}
+	
+	@Override
+	public List<CommentInfo> selectCommentInfo(VideoInfo videoInfo){
+		return sqlSession.selectList(namespace + ".selectCommentInfo", videoInfo);
+	}
+	
+	@Override
+	public int updateSentiment(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateSentiment", commentInfo);
+	}
 }

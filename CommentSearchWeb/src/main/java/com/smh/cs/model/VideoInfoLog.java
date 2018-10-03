@@ -23,6 +23,8 @@ public class VideoInfoLog {
 	int titleLength;
 	int descriptionLength;
 	String chat;
+	float sentiment;
+	float magnitude;
 	
 	public String getVideoId() {
 		return videoId;
@@ -107,6 +109,18 @@ public class VideoInfoLog {
 	}
 	public void setChatLength(int chatLength) {
 		this.chatLength = chatLength;
+	}
+	public float getSentiment() {
+		return sentiment;
+	}
+	public void setSentiment(float sentiment) {
+		this.sentiment = sentiment;
+	}
+	public float getMagnitude() {
+		return magnitude;
+	}
+	public void setMagnitude(float magnitude) {
+		this.magnitude = magnitude;
 	}
 	
 }

@@ -198,6 +198,75 @@
 	    });
 	}
 	
+	function mysqlToElasticsearch(){
+		var uri="/mysqlToElasticsearch";  
+	    
+	    var oTable = $('#csearchTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(oData["videoId"], sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
+	    	]
+	    	
+	    });
+	}
+	
+	function sentiment(){
+		var uri="/sentiment";  
+	    
+	    var oTable = $('#csearchTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(oData["videoId"], sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
+	    	]
+	    	
+	    });
+
+	}
+	
 	function makeVideoId(videoId){
 		seletedVideoId = videoId;
 		
@@ -344,6 +413,9 @@
 			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearch();}"/>
 			                        </div>
 									<button type="submit" onclick="csearch();" class="btn btn-success">Submit</button>
+									
+									<button type="submit" onclick="sentiment();" class="btn btn-success">Sentiment</button>
+									<button type="submit" onclick="mysqlToElasticsearch();" class="btn btn-success">toElastic</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>

@@ -106,6 +106,22 @@ public class SearchCtrl {
 		return "home";
 	}
 	
+	@RequestMapping(value = "/sentiment", method = RequestMethod.POST)
+	public String sentiment(Locale locale, Model model) throws Exception {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		doSentiment();
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "home";
+	}
+	
 	@RequestMapping(value = "/comparison", method = RequestMethod.GET)
 	public String live(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
@@ -226,6 +242,14 @@ public class SearchCtrl {
 		return "";
 	}
 	
+	@RequestMapping(value = "/mysqlToElasticsearch", method = RequestMethod.POST)
+	public @ResponseBody String mysqlToElasticsearch(Locale locale, Model model) throws Exception {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		doMysqlToElasticsearch();
+		
+		return "home";
+	}
 	
 	public List<CommentInfo> getComment(String videoId, String title, String videoTime, String description, BigInteger viewCount, BigInteger commentCount) {
 		
@@ -322,9 +346,12 @@ public class SearchCtrl {
                     log.setTitleLength(title.length());
                     log.setDescriptionLength(description.length());
                     
-                    commentInfoList.add(commentInfo);
+                    Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(snippet.getTextDisplay());
                     
-                    //Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(snippet.getTextDisplay());
+                    commentInfo.setSentiment(sentiment.getScore());
+                    commentInfo.setMagnitude(sentiment.getMagnitude());
+                    
+                    commentInfoList.add(commentInfo);
 
                     service.addCommentInfo(commentInfo);
                     
@@ -775,5 +802,74 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
+	
+	public void doSentiment() throws Exception {
+		List<VideoInfo> videoInfoList = service.selectVideoInfo();
+		
+		int cnt = 0;
+		
+		for(VideoInfo videoInfo : videoInfoList) {
+			
+			System.out.println("===cnt:" + cnt++);
+			
+			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+
+			for( CommentInfo commentInfo : commentInfoList) {
+				
+				if( commentInfo.getSentiment() == 0.0 && commentInfo.getMagnitude() == 0.0) {
+					Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(commentInfo.getComment());
+					
+					if( sentiment != null) {
+						commentInfo.setSentiment(sentiment.getScore());
+						commentInfo.setMagnitude(sentiment.getMagnitude());
+						
+						service.updateSentiment(commentInfo);
+					}
+				}
+			}
+			
+		}
+	}
+	
+	public void doMysqlToElasticsearch() throws Exception {
+		List<VideoInfo> videoInfoList = service.selectVideoInfo();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+		
+		int cnt = 0;
+		
+		for( int limit = 10 ; limit < 100 ; limit += 10) {
+			for(VideoInfo videoInfo : videoInfoList) {
+				
+				System.out.println("===cnt:" + cnt++);
+				
+				videoInfo.setLimit(limit);
+				List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+				
+				VideoInfoLog log = new VideoInfoLog();
+	            HttpEntity<Object> requestEntity = null;
+				
+				for( CommentInfo commentInfo : commentInfoList) {
+					
+					log.setVideoId(videoInfo.getVideoId());
+	                log.setTitle(videoInfo.getTitle());
+	                log.setVideoTime(videoInfo.getVideoTime());
+	                log.setDescription(videoInfo.getDescription());
+	                log.setViewCount(videoInfo.getViewCount());
+	                log.setCommentCount(videoInfo.getCommentCount());
+	                log.setTitleLength(videoInfo.getTitleLength());
+	                log.setDescriptionLength(videoInfo.getDescriptionLength());
+	                log.setTime(commentInfo.getTime());
+	                log.setAuthor(commentInfo.getAuthor());
+	                log.setComment(commentInfo.getComment());
+	                log.setCommentLength(commentInfo.getCommentLength());
+				
+	                requestEntity = new HttpEntity<Object>(log, headers);
+					ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment" + limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+				}
+				
+			}
+		}
 	}
 }

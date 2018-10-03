@@ -30,4 +30,14 @@ public class SearchServiceImpl implements SearchService{
 	public int addCommentInfo(CommentInfo commentInfo) throws Exception{
 		return dao.addCommentInfo(commentInfo);
 	}
+	
+	@Override
+	public List<CommentInfo> selectCommentInfo(VideoInfo videoInfo) throws Exception{
+		return dao.selectCommentInfo(videoInfo);
+	}
+	
+	@Override
+	public int updateSentiment(CommentInfo commentInfo) throws Exception{
+		return dao.updateSentiment(commentInfo);
+	}
 }

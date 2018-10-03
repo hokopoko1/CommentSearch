@@ -11,4 +11,8 @@ public interface SearchService {
 	public int addVideoInfo(VideoInfo videoInfo) throws Exception;
 	
 	public int addCommentInfo(CommentInfo commentInfo) throws Exception;
+	
+	public List<CommentInfo> selectCommentInfo(VideoInfo videoInfo) throws Exception;
+	
+	public int updateSentiment(CommentInfo commentInfo) throws Exception;
 }

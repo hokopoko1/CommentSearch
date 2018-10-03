@@ -26,6 +26,7 @@ public class VideoInfo {
 	List<String> tags;
 	List<CommentInfo> commentList;
 	List<ChatInfo> chatList;
+	int limit;
 	
 	public String getId() {
 		return id;
@@ -123,5 +124,10 @@ public class VideoInfo {
 	public void setDescriptionLength(int descriptionLength) {
 		this.descriptionLength = descriptionLength;
 	}
-	
+	public int getLimit() {
+		return limit;
+	}
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
 }

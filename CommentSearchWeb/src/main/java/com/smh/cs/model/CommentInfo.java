@@ -7,6 +7,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommentInfo {
 
+	String id;
 	String videoId;
 	String time;
 	String author;
@@ -16,7 +17,14 @@ public class CommentInfo {
 	int chatLength;
 	float sentiment;
 	float magnitude;
+	int limit;
 	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public String getVideoId() {
 		return videoId;
 	}
@@ -70,6 +78,12 @@ public class CommentInfo {
 	}
 	public void setChatLength(int chatLength) {
 		this.chatLength = chatLength;
+	}
+	public int getLimit() {
+		return limit;
+	}
+	public void setLimit(int limit) {
+		this.limit = limit;
 	}
 	
 }
