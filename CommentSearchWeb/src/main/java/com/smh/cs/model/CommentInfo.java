@@ -18,6 +18,7 @@ public class CommentInfo {
 	float sentiment;
 	float magnitude;
 	int limit;
+	String sentiUpdate;
 	
 	public String getId() {
 		return id;
@@ -84,6 +85,12 @@ public class CommentInfo {
 	}
 	public void setLimit(int limit) {
 		this.limit = limit;
+	}
+	public String getSentiUpdate() {
+		return sentiUpdate;
+	}
+	public void setSentiUpdate(String sentiUpdate) {
+		this.sentiUpdate = sentiUpdate;
 	}
 	
 }

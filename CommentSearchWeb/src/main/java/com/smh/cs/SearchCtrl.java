@@ -816,8 +816,12 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
+
+				System.out.println("id:" + commentInfo.getId());
+				System.out.println("VideoId:" + commentInfo.getVideoId());
+				System.out.println("comment:" + commentInfo.getComment());
 				
-				if( commentInfo.getSentiment() == 0.0 && commentInfo.getMagnitude() == 0.0) {
+				if( commentInfo.getSentiUpdate() == null ) {
 					Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(commentInfo.getComment());
 					
 					if( sentiment != null) {

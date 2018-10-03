@@ -86,7 +86,8 @@
 			sentiment, 
 			magnitude, 
 			chat,
-			chat_length AS chatLength
+			chat_length AS chatLength,
+			senti_update AS sentiUpdate
 		FROM comment
 		WHERE video_id = #{videoId}
 		<if test="limit != 0">
@@ -97,7 +98,8 @@
 	<update id="updateSentiment" parameterType="com.smh.cs.model.CommentInfo">
 		UPDATE comment SET
 			sentiment = #{sentiment},
-			magnitude = #{magnitude}
+			magnitude = #{magnitude},
+			senti_update = 'true'
 		WHERE
 			id = #{id}
 	</update>
