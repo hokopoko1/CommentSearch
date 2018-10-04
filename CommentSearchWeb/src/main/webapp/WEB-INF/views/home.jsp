@@ -235,6 +235,11 @@
 	function sentiment(){
 		var uri="/sentiment";  
 	    
+		var start = document.getElementById("start").value;
+		var end = document.getElementById("end").value;
+		
+	    var params="?start="+start+"&end="+end; 
+		
 	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
 	    	"serverSide" : true,
@@ -242,7 +247,7 @@
 	    	"bStateSave" : true,
 	    	ajax : {
 	    		type:"POST",  
-	 			url:uri,
+	 			url:uri + params,
 	    	},
 	    	columns: [
 	    		/*
@@ -413,9 +418,6 @@
 			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearch();}"/>
 			                        </div>
 									<button type="submit" onclick="csearch();" class="btn btn-success">Submit</button>
-									
-									<button type="submit" onclick="sentiment();" class="btn btn-success">Sentiment</button>
-									<button type="submit" onclick="mysqlToElasticsearch();" class="btn btn-success">toElastic</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>
@@ -429,6 +431,7 @@
 		                            <input type="text" id="startDate" value="2018-09-01T00:00:00Z" />
 		                            <input type="text" id="endDate" value="2018-09-02T00:00:00Z" />
 		                        </div>
+		                        
 								<!-- 
 								<div class="x_content">
 									<br />
@@ -442,6 +445,12 @@
 								 -->
 							</div>
 						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<input type="text" id="start" value="1" />
+							<input type="text" id="end" value="1000" />
+                        	<button type="submit" onclick="sentiment();" class="btn btn-success">Sentiment</button>
+							<button type="submit" onclick="mysqlToElasticsearch();" class="btn btn-success">toElastic</button>
+		                </div>
 						<div class="col-md-6 col-sm-6 col-xs-12">
 							<div class="x_panel">
 								<div class="x_title">

@@ -42,7 +42,8 @@
 				chat,
 				chat_length,
 				sentiment,
-				magnitude
+				magnitude,
+				reg_date
 			)
 		VALUES
 			(
@@ -54,8 +55,8 @@
 				#{chat},
 				#{chatLength},
 				#{sentiment},
-				#{magnitude}
-				
+				#{magnitude},
+				now()				
 			)
 	</insert>
 	                   
@@ -74,6 +75,11 @@
 			description_length AS descriptionLength
 		
 		FROM video_info
+		<if test="start != null and end != null">
+			WHERE
+				id <![CDATA[>=]]> #{start}
+				AND id <![CDATA[<]]> #{end}
+		</if>
 	</select>
 
 	<select id="selectCommentInfo" parameterType="com.smh.cs.model.CommentInfo" resultType="com.smh.cs.model.CommentInfo">
@@ -90,16 +96,28 @@
 			senti_update AS sentiUpdate
 		FROM comment
 		WHERE video_id = #{videoId}
+		<if test="sentiUpdate != null">
+			AND senti_update IS NULL
+		</if>
 		<if test="limit != 0">
     		LIMIT #{limit}
 		</if>
 	</select>
-              
+                              
 	<update id="updateSentiment" parameterType="com.smh.cs.model.CommentInfo">
 		UPDATE comment SET
 			sentiment = #{sentiment},
 			magnitude = #{magnitude},
-			senti_update = 'true'
+			senti_update = 'true',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateSentimentFail" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment SET
+			senti_update = 'fail',
+			update_date = now()
 		WHERE
 			id = #{id}
 	</update>

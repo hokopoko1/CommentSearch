@@ -17,8 +17,8 @@ public class SearchServiceImpl implements SearchService{
 	private SearchDao dao;
 	
 	@Override
-	public List<VideoInfo> selectVideoInfo() throws Exception {
-		return dao.selectVideoInfo();
+	public List<VideoInfo> selectVideoInfo(VideoInfo videoInfo) throws Exception {
+		return dao.selectVideoInfo(videoInfo);
 	}
 	
 	@Override
@@ -39,5 +39,10 @@ public class SearchServiceImpl implements SearchService{
 	@Override
 	public int updateSentiment(CommentInfo commentInfo) throws Exception{
 		return dao.updateSentiment(commentInfo);
+	}
+	
+	@Override
+	public int updateSentimentFail(CommentInfo commentInfo) throws Exception{
+		return dao.updateSentimentFail(commentInfo);
 	}
 }

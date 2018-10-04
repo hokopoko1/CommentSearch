@@ -30,8 +30,8 @@ public class SearchDaoImpl implements SearchDao{
 	}
 	
 	@Override
-	public List<VideoInfo> selectVideoInfo() {
-		return sqlSession.selectList(namespace + ".selectVideoInfo");
+	public List<VideoInfo> selectVideoInfo(VideoInfo videoInfo) {
+		return sqlSession.selectList(namespace + ".selectVideoInfo", videoInfo);
 	}
 	
 	@Override
@@ -47,5 +47,10 @@ public class SearchDaoImpl implements SearchDao{
 	@Override
 	public int updateSentiment(CommentInfo commentInfo) {
 		return sqlSession.update(namespace + ".updateSentiment", commentInfo);
+	}
+	
+	@Override
+	public int updateSentimentFail(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateSentimentFail", commentInfo);
 	}
 }

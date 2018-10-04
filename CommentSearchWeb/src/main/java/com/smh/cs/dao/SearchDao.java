@@ -14,10 +14,12 @@ public interface SearchDao {
 	
 	public int addCommentInfo(CommentInfo commentInfo);
 	
-	public List<VideoInfo> selectVideoInfo() throws Exception;
+	public List<VideoInfo> selectVideoInfo(VideoInfo videoInfo) throws Exception;
 	
 	public List<CommentInfo> selectCommentInfo(VideoInfo videoInfo) throws Exception;
 	
 	public int updateSentiment(CommentInfo commentInfo);
+	
+	public int updateSentimentFail(CommentInfo commentInfo);
 	
 }

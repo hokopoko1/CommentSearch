@@ -922,7 +922,7 @@ public class SearchSvc {
 		
 		try {
 			
-			List<VideoInfo> test = service.selectVideoInfo();
+			//List<VideoInfo> test = service.selectVideoInfo();
 			
 			service.addVideoInfo(videoInfo);
 		} catch (Exception e1) {

@@ -107,7 +107,7 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/sentiment", method = RequestMethod.POST)
-	public String sentiment(Locale locale, Model model) throws Exception {
+	public String sentiment(@RequestParam("start") String start, @RequestParam("end") String end, Locale locale, Model model) throws Exception {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		Date date = new Date();
@@ -115,7 +115,7 @@ public class SearchCtrl {
 		
 		String formattedDate = dateFormat.format(date);
 		
-		doSentiment();
+		doSentiment(start, end);
 		
 		model.addAttribute("serverTime", formattedDate );
 		
@@ -804,8 +804,12 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 			}
 	}
 	
-	public void doSentiment() throws Exception {
-		List<VideoInfo> videoInfoList = service.selectVideoInfo();
+	public void doSentiment(String start, String end) throws Exception {
+		
+		VideoInfo tmpVideo = new VideoInfo();
+		tmpVideo.setStart(start);
+		tmpVideo.setEnd(end);
+		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
 		
 		int cnt = 0;
 		
@@ -813,6 +817,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 			
 			System.out.println("===cnt:" + cnt++);
 			
+			videoInfo.setSentiUpdate("true");
 			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
@@ -829,6 +834,8 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 						commentInfo.setMagnitude(sentiment.getMagnitude());
 						
 						service.updateSentiment(commentInfo);
+					}else {
+						service.updateSentimentFail(commentInfo);
 					}
 				}
 			}
@@ -837,7 +844,10 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 	}
 	
 	public void doMysqlToElasticsearch() throws Exception {
-		List<VideoInfo> videoInfoList = service.selectVideoInfo();
+		
+		VideoInfo tmpVideo = new VideoInfo();
+		
+		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		

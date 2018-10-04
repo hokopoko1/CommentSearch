@@ -27,6 +27,9 @@ public class VideoInfo {
 	List<CommentInfo> commentList;
 	List<ChatInfo> chatList;
 	int limit;
+	String sentiUpdate;
+	String start;
+	String end;
 	
 	public String getId() {
 		return id;
@@ -130,4 +133,23 @@ public class VideoInfo {
 	public void setLimit(int limit) {
 		this.limit = limit;
 	}
+	public String getSentiUpdate() {
+		return sentiUpdate;
+	}
+	public void setSentiUpdate(String sentiUpdate) {
+		this.sentiUpdate = sentiUpdate;
+	}
+	public String getStart() {
+		return start;
+	}
+	public void setStart(String start) {
+		this.start = start;
+	}
+	public String getEnd() {
+		return end;
+	}
+	public void setEnd(String end) {
+		this.end = end;
+	}
+	
 }

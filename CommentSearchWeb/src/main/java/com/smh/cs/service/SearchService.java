@@ -6,7 +6,7 @@ import com.smh.cs.model.CommentInfo;
 import com.smh.cs.model.VideoInfo;
 
 public interface SearchService {
-	public List<VideoInfo> selectVideoInfo() throws Exception;
+	public List<VideoInfo> selectVideoInfo(VideoInfo videoInfo) throws Exception;
 	
 	public int addVideoInfo(VideoInfo videoInfo) throws Exception;
 	
@@ -15,4 +15,6 @@ public interface SearchService {
 	public List<CommentInfo> selectCommentInfo(VideoInfo videoInfo) throws Exception;
 	
 	public int updateSentiment(CommentInfo commentInfo) throws Exception;
+	
+	public int updateSentimentFail(CommentInfo commentInfo) throws Exception;
 }
