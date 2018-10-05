@@ -883,7 +883,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 				System.out.println("VideoId:" + commentInfo.getVideoId());
 				System.out.println("comment:" + commentInfo.getComment());
 				
-				if( commentInfo.getCateUpdate() == null ) {
+				//if( commentInfo.getCateUpdate() == null ) {
 					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getComment());
 					System.out.println(categories);
 					if( categories != null ) {
@@ -911,7 +911,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 					}
 					
 					
-				}
+				//}
 			}
 			
 		}
