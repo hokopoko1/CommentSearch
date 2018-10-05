@@ -122,6 +122,22 @@ public class SearchCtrl {
 		return "home";
 	}
 	
+	@RequestMapping(value = "/categories", method = RequestMethod.POST)
+	public String categories(@RequestParam("start") String start, @RequestParam("end") String end, Locale locale, Model model) throws Exception {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		doCategories(start, end) ;
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "home";
+	}
+	
 	@RequestMapping(value = "/comparison", method = RequestMethod.GET)
 	public String live(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
@@ -348,8 +364,10 @@ public class SearchCtrl {
                     
                     Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(snippet.getTextDisplay());
                     
-                    commentInfo.setSentiment(sentiment.getScore());
-                    commentInfo.setMagnitude(sentiment.getMagnitude());
+                    if( sentiment != null) {
+                    	commentInfo.setSentiment(sentiment.getScore());
+                        commentInfo.setMagnitude(sentiment.getMagnitude());
+                    }
                     
                     commentInfoList.add(commentInfo);
 
@@ -837,6 +855,62 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 					}else {
 						service.updateSentimentFail(commentInfo);
 					}
+				}
+			}
+			
+		}
+	}
+	
+	public void doCategories(String start, String end) throws Exception {
+		
+		VideoInfo tmpVideo = new VideoInfo();
+		tmpVideo.setStart(start);
+		tmpVideo.setEnd(end);
+		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
+		
+		int cnt = 0;
+		
+		for(VideoInfo videoInfo : videoInfoList) {
+			
+			System.out.println("===cnt:" + cnt++);
+			
+//			videoInfo.setSentiUpdate("true");
+			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+
+			for( CommentInfo commentInfo : commentInfoList) {
+
+				System.out.println("id:" + commentInfo.getId());
+				System.out.println("VideoId:" + commentInfo.getVideoId());
+				System.out.println("comment:" + commentInfo.getComment());
+				
+				if( commentInfo.getCateUpdate() == null ) {
+					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getComment());
+					System.out.println(categories);
+					if( categories != null ) {
+						
+						String category = "";
+						String confidence = "";
+						int i = 0;
+						for( ClassificationCategory cfc : categories) {
+							if( i == 0) {
+								category = cfc.getName();
+								confidence = confidence + cfc.getConfidence();
+							}else {
+								category = category + "," + cfc.getName();
+								confidence = confidence + "," +  cfc.getConfidence();
+							}
+							i++;
+						}
+						
+						commentInfo.setCategory(category);
+						commentInfo.setConfidence(confidence);
+						
+						service.updateCategori(commentInfo);
+					}else {
+						service.updateCategoriFail(commentInfo);
+					}
+					
+					
 				}
 			}
 			

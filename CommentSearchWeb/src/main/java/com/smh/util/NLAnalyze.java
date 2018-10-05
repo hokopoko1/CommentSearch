@@ -87,4 +87,21 @@ public class NLAnalyze {
 
 		return null;
 	}
+	
+	public List<ClassificationCategory> analyzeCategories(String text) {
+		try {
+			Document document = Document.newBuilder().setContent(text).setType(Document.Type.PLAIN_TEXT).build();
+
+			ClassifyTextRequest request = ClassifyTextRequest.newBuilder().setDocument(document).build();
+
+			ClassifyTextResponse response = languageServiceClient.classifyText(request);
+			
+			return response.getCategoriesList();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 }

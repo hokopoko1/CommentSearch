@@ -22,4 +22,8 @@ public interface SearchDao {
 	
 	public int updateSentimentFail(CommentInfo commentInfo);
 	
+	public int updateCategori(CommentInfo commentInfo);
+	
+	public int updateCategoriFail(CommentInfo commentInfo);
+	
 }

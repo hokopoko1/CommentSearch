@@ -43,7 +43,10 @@
 				chat_length,
 				sentiment,
 				magnitude,
-				reg_date
+				reg_date,
+				category,
+				confidence,
+				cate_update
 			)
 		VALUES
 			(
@@ -56,7 +59,10 @@
 				#{chatLength},
 				#{sentiment},
 				#{magnitude},
-				now()				
+				now(),
+				#{category},
+				#{confidence},
+				#{cateUpdate}
 			)
 	</insert>
 	                   
@@ -93,12 +99,18 @@
 			magnitude, 
 			chat,
 			chat_length AS chatLength,
-			senti_update AS sentiUpdate
+			senti_update AS sentiUpdate,
+			category,
+			confidence,
+			cate_update AS cateUpdate
 		FROM comment
 		WHERE video_id = #{videoId}
+		AND sentiment != 0 AND magnitude != 0 AND cate_update = "fail" AND comment_length > 20
+		<!-- 
 		<if test="sentiUpdate != null">
 			AND senti_update IS NULL
 		</if>
+		 -->
 		<if test="limit != 0">
     		LIMIT #{limit}
 		</if>
@@ -117,6 +129,24 @@
 	<update id="updateSentimentFail" parameterType="com.smh.cs.model.CommentInfo">
 		UPDATE comment SET
 			senti_update = 'fail',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateCategori" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment SET
+			category = #{category},
+			confidence = #{confidence},
+			cate_update = 'true',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateCategoriFail" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment SET
+			cate_update = 'fail',
 			update_date = now()
 		WHERE
 			id = #{id}

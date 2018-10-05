@@ -272,6 +272,46 @@
 
 	}
 	
+	function categories(){
+		var uri="/categories";  
+	    
+		var start = document.getElementById("start").value;
+		var end = document.getElementById("end").value;
+		
+	    var params="?start="+start+"&end="+end; 
+		
+	    var oTable = $('#csearchTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri + params,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(oData["videoId"], sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
+	    	]
+	    	
+	    });
+
+	}
+	
 	function makeVideoId(videoId){
 		seletedVideoId = videoId;
 		
@@ -449,6 +489,7 @@
 							<input type="text" id="start" value="1" />
 							<input type="text" id="end" value="1000" />
                         	<button type="submit" onclick="sentiment();" class="btn btn-success">Sentiment</button>
+                        	<button type="submit" onclick="categories();" class="btn btn-success">categories</button>
 							<button type="submit" onclick="mysqlToElasticsearch();" class="btn btn-success">toElastic</button>
 		                </div>
 						<div class="col-md-6 col-sm-6 col-xs-12">

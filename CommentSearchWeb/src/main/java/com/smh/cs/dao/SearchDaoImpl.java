@@ -53,4 +53,14 @@ public class SearchDaoImpl implements SearchDao{
 	public int updateSentimentFail(CommentInfo commentInfo) {
 		return sqlSession.update(namespace + ".updateSentimentFail", commentInfo);
 	}
+	
+	@Override
+	public int updateCategori(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateCategori", commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriFail(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateCategoriFail", commentInfo);
+	}
 }

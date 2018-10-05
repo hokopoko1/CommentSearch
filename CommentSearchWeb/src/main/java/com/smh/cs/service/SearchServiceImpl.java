@@ -45,4 +45,14 @@ public class SearchServiceImpl implements SearchService{
 	public int updateSentimentFail(CommentInfo commentInfo) throws Exception{
 		return dao.updateSentimentFail(commentInfo);
 	}
+	
+	@Override
+	public int updateCategori(CommentInfo commentInfo) throws Exception{
+		return dao.updateCategori(commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriFail(CommentInfo commentInfo) throws Exception{
+		return dao.updateCategoriFail(commentInfo);
+	}
 }

@@ -19,6 +19,9 @@ public class CommentInfo {
 	float magnitude;
 	int limit;
 	String sentiUpdate;
+	String category;
+	String confidence;
+	String cateUpdate;
 	
 	public String getId() {
 		return id;
@@ -91,6 +94,24 @@ public class CommentInfo {
 	}
 	public void setSentiUpdate(String sentiUpdate) {
 		this.sentiUpdate = sentiUpdate;
+	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	public String getConfidence() {
+		return confidence;
+	}
+	public void setConfidence(String confidence) {
+		this.confidence = confidence;
+	}
+	public String getCateUpdate() {
+		return cateUpdate;
+	}
+	public void setCateUpdate(String cateUpdate) {
+		this.cateUpdate = cateUpdate;
 	}
 	
 }

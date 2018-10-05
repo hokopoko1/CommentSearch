@@ -17,4 +17,8 @@ public interface SearchService {
 	public int updateSentiment(CommentInfo commentInfo) throws Exception;
 	
 	public int updateSentimentFail(CommentInfo commentInfo) throws Exception;
+	
+	public int updateCategori(CommentInfo commentInfo) throws Exception;
+	
+	public int updateCategoriFail(CommentInfo commentInfo) throws Exception;
 }
