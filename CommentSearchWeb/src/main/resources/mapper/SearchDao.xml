@@ -105,12 +105,9 @@
 			cate_update AS cateUpdate
 		FROM comment
 		WHERE video_id = #{videoId}
-		AND sentiment != 0 AND magnitude != 0 AND cate_update = "fail" AND comment_length > 20
-		<!-- 
 		<if test="sentiUpdate != null">
 			AND senti_update IS NULL
 		</if>
-		 -->
 		<if test="limit != 0">
     		LIMIT #{limit}
 		</if>

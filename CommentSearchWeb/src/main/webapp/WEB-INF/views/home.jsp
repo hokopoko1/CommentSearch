@@ -200,7 +200,11 @@
 	
 	function mysqlToElasticsearch(){
 		var uri="/mysqlToElasticsearch";  
-	    
+		var limit = document.getElementById("limit").value;
+		
+	    var params="?limit="+limit;  
+		
+		
 	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
 	    	"serverSide" : true,
@@ -208,7 +212,7 @@
 	    	"bStateSave" : true,
 	    	ajax : {
 	    		type:"POST",  
-	 			url:uri,
+	 			url:uri+params,
 	    	},
 	    	columns: [
 	    		/*
@@ -490,6 +494,8 @@
 							<input type="text" id="end" value="1000" />
                         	<button type="submit" onclick="sentiment();" class="btn btn-success">Sentiment</button>
                         	<button type="submit" onclick="categories();" class="btn btn-success">categories</button>
+							
+							<input type="text" id="limit" value="10" />
 							<button type="submit" onclick="mysqlToElasticsearch();" class="btn btn-success">toElastic</button>
 		                </div>
 						<div class="col-md-6 col-sm-6 col-xs-12">

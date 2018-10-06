@@ -259,10 +259,10 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/mysqlToElasticsearch", method = RequestMethod.POST)
-	public @ResponseBody String mysqlToElasticsearch(Locale locale, Model model) throws Exception {
+	public @ResponseBody String mysqlToElasticsearch(@RequestParam("limit") int limit, Locale locale, Model model) throws Exception {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		doMysqlToElasticsearch();
+		doMysqlToElasticsearch(limit);
 		
 		return "home";
 	}
@@ -917,7 +917,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 		}
 	}
 	
-	public void doMysqlToElasticsearch() throws Exception {
+	public void doMysqlToElasticsearch(int limit) throws Exception {
 		
 		VideoInfo tmpVideo = new VideoInfo();
 		
@@ -927,7 +927,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 		
 		int cnt = 0;
 		
-		for( int limit = 10 ; limit < 100 ; limit += 10) {
+//		for( int limit = 10 ; limit < 100 ; limit += 10) {
 			for(VideoInfo videoInfo : videoInfoList) {
 				
 				System.out.println("===cnt:" + cnt++);
@@ -952,12 +952,16 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 	                log.setAuthor(commentInfo.getAuthor());
 	                log.setComment(commentInfo.getComment());
 	                log.setCommentLength(commentInfo.getCommentLength());
+	                log.setCategory(commentInfo.getCategory());
+	                log.setConfidence(commentInfo.getConfidence());
+	                log.setSentiment(commentInfo.getSentiment());
+	                log.setMagnitude(commentInfo.getMagnitude());
 				
 	                requestEntity = new HttpEntity<Object>(log, headers);
 					ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment" + limit + "/1/", HttpMethod.POST, requestEntity, String.class);
 				}
 				
 			}
-		}
+//		}
 	}
 }

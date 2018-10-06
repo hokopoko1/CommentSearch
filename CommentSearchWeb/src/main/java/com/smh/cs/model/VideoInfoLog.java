@@ -25,6 +25,9 @@ public class VideoInfoLog {
 	String chat;
 	float sentiment;
 	float magnitude;
+	String category;
+	String confidence;
+	String cateUpdate;
 	
 	public String getVideoId() {
 		return videoId;
@@ -121,6 +124,24 @@ public class VideoInfoLog {
 	}
 	public void setMagnitude(float magnitude) {
 		this.magnitude = magnitude;
+	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	public String getConfidence() {
+		return confidence;
+	}
+	public void setConfidence(String confidence) {
+		this.confidence = confidence;
+	}
+	public String getCateUpdate() {
+		return cateUpdate;
+	}
+	public void setCateUpdate(String cateUpdate) {
+		this.cateUpdate = cateUpdate;
 	}
 	
 }
