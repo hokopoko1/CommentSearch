@@ -240,9 +240,10 @@
 	function mysqlToElasticsearch(){
 		var uri="/mysqlToElasticsearch";  
 		var limit = document.getElementById("limit").value;
+		var start = document.getElementById("start").value;
+		var end = document.getElementById("end").value;
 		
-	    var params="?limit="+limit;  
-		
+	    var params="?limit="+limit+"&start="+start+"&end="+end;   
 		
 	    var oTable = $('#csearchTables').DataTable({
 	    	"processing" : true,
@@ -498,9 +499,9 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearchVideoLive();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){searchPop();}"/>
 			                        </div>
-									<button type="submit" onclick="csearchVideoLive();" class="btn btn-success">Submit</button>
+									<button type="submit" onclick="searchPop();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>

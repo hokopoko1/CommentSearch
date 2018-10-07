@@ -193,7 +193,7 @@ public class SearchCtrl {
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-		searchSvc.searchPop();
+		searchPop();
 		
 		return rtn;
 	}
@@ -259,10 +259,10 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/mysqlToElasticsearch", method = RequestMethod.POST)
-	public @ResponseBody String mysqlToElasticsearch(@RequestParam("limit") int limit, Locale locale, Model model) throws Exception {
+	public @ResponseBody String mysqlToElasticsearch(@RequestParam("start") String start, @RequestParam("end") String end,@RequestParam("limit") int limit, Locale locale, Model model) throws Exception {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
-		doMysqlToElasticsearch(limit);
+		doMysqlToElasticsearch(limit, start, end);
 		
 		return "home";
 	}
@@ -375,6 +375,146 @@ public class SearchCtrl {
                     
                     requestEntity = new HttpEntity<Object>(log, headers);
 					ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment100/1/", HttpMethod.POST, requestEntity, String.class);
+                }
+                CommentThread firstComment = videoComments.get(0);
+ 
+                // Will use this thread as parent to new reply.
+                String parentId = firstComment.getId();
+
+                // Create a comment snippet with text.
+                CommentSnippet commentSnippet = new CommentSnippet();
+//                commentSnippet.setTextOriginal(text);
+                commentSnippet.setParentId(parentId);
+
+                // Create a comment with snippet.
+                Comment comment = new Comment();
+                comment.setSnippet(commentSnippet);
+
+            }
+        } catch (GoogleJsonResponseException e) {
+            System.err.println("GoogleJsonResponseException code: " + e.getDetails().getCode()
+                    + " : " + e.getDetails().getMessage());
+            e.printStackTrace();
+
+        } catch (IOException e) {
+            System.err.println("IOException: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Throwable t) {
+            System.err.println("Throwable: " + t);
+            t.printStackTrace();
+        }
+        
+        return commentInfoList;
+	}
+	
+	public List<CommentInfo> getCommentPop(String videoId, String title, String videoTime, String description, BigInteger viewCount, BigInteger commentCount) {
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+		
+		List<CommentInfo> commentInfoList = new ArrayList<CommentInfo>();
+		
+		
+		VideoInfo videoInfo = new VideoInfo();
+		
+		String thumbnail = "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg";
+		
+		videoInfo.setVideoId(videoId);
+		videoInfo.setTitle(title);
+		videoInfo.setVideoTime(videoTime);
+		videoInfo.setType("pop");
+		videoInfo.setThumbnail(thumbnail);
+		videoInfo.setDescription(description);
+		videoInfo.setViewCount(viewCount);
+		videoInfo.setCommentCount(commentCount);
+		videoInfo.setTitleLength(title.length());
+		videoInfo.setDescriptionLength(description.length());
+		
+		try {
+			service.addVideoInfoPop(videoInfo);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+        try {
+    	    Properties properties = new Properties();
+    	    try {
+    	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+    	      properties.load(in);
+
+    	    } catch (IOException e) {
+    	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+    	          + " : " + e.getMessage());
+    	      System.exit(1);
+    	    }
+
+    	    String apiKey = properties.getProperty("youtube.apikey");
+        	
+        	youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+		        public void initialize(HttpRequest request) throws IOException {}
+		      }).setApplicationName("youtube-cmdline-search-sample").build();
+        	
+            System.out.println("You chose " + videoId + " to subscribe.");
+            CommentThreadListResponse videoCommentsListResponse = youtube.commentThreads()
+                    .list("snippet").setKey(apiKey).setVideoId(videoId).setMaxResults(100L).setTextFormat("plainText").execute();
+            List<CommentThread> videoComments = videoCommentsListResponse.getItems();
+
+            if (videoComments.isEmpty()) {
+                System.out.println("Can't get video comments.");
+            } else {
+                // Print information from the API response.
+                System.out
+                        .println("\n================== Returned Video Comments ==================\n");
+
+                CommentInfo commentInfo = null;
+                
+                VideoInfoLog log = new VideoInfoLog();
+                HttpEntity<Object> requestEntity = null;
+                
+                for (CommentThread videoComment : videoComments) {
+                	commentInfo = new CommentInfo();
+                	
+                    CommentSnippet snippet = videoComment.getSnippet().getTopLevelComment()
+                            .getSnippet();
+//                    System.out.println("  - Time: " + snippet.getPublishedAt());
+//                    System.out.println("  - Author: " + snippet.getAuthorDisplayName());
+//                    System.out.println("  - Comment: " + snippet.getTextDisplay());
+//                    System.out
+//                            .println("\n-------------------------------------------------------------\n");
+                    
+                    commentInfo.setVideoId(videoId);
+                    commentInfo.setTime(snippet.getPublishedAt().toString());
+                    commentInfo.setAuthor(snippet.getAuthorDisplayName());
+                    commentInfo.setComment(snippet.getTextDisplay());
+                    commentInfo.setCommentLength(snippet.getTextDisplay().length());
+                    
+                    log.setVideoId(videoId);
+                    log.setTitle(title);
+                    log.setVideoTime(videoTime);
+                    log.setTime(snippet.getPublishedAt().toString());
+                    log.setAuthor(snippet.getAuthorDisplayName());
+                    log.setComment(snippet.getTextDisplay());
+                    log.setDescription(description);
+                    log.setViewCount(viewCount);
+                    log.setCommentCount(commentCount);
+                    log.setCommentLength(snippet.getTextDisplay().length());
+                    log.setTitleLength(title.length());
+                    log.setDescriptionLength(description.length());
+                    
+//                    Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(snippet.getTextDisplay());
+//                    
+//                    if( sentiment != null) {
+//                    	commentInfo.setSentiment(sentiment.getScore());
+//                        commentInfo.setMagnitude(sentiment.getMagnitude());
+//                    }
+                    
+                    commentInfoList.add(commentInfo);
+
+                    service.addCommentInfoPop(commentInfo);
+                    
+                    requestEntity = new HttpEntity<Object>(log, headers);
+//					ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment100/1/", HttpMethod.POST, requestEntity, String.class);
                 }
                 CommentThread firstComment = videoComments.get(0);
  
@@ -707,6 +847,58 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		}
 	}
 	
+	public void prettyPrintCsearchPop(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+
+		System.out.println("\n=============================================================");
+		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
+		System.out.println("=============================================================\n");
+
+		if (!iteratorSearchResults.hasNext()) {
+			System.out.println(" There aren't any results for your query.");
+		}
+		
+		while (iteratorSearchResults.hasNext()) {
+
+			SearchResult singleVideo = iteratorSearchResults.next();
+			ResourceId rId = singleVideo.getId();
+
+			VideoInfo tmpVideo = new VideoInfo();
+			
+			// Double checks the kind is video.
+			if (rId.getKind().equals("youtube#video")) {
+				// Thumbnail thumbnail =
+				// singleVideo.getSnippet().getThumbnails().get("default");
+
+				System.out.println(" Video Id: " + rId.getVideoId());
+				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
+				// System.out.println(" Thumbnail: " + thumbnail.getUrl());
+				System.out.println("\n-------------------------------------------------------------\n");
+				
+				logger.debug(rId.getVideoId());
+				logger.debug(singleVideo.getSnippet().getTitle());
+				
+				String thumbnail = "https://i.ytimg.com/vi/" + rId.getVideoId() + "/hqdefault.jpg";
+				
+				List<Video> videoResultList = Videos(rId.getVideoId());
+				
+				tmpVideo.setVideoId(rId.getVideoId());
+				tmpVideo.setTitle(singleVideo.getSnippet().getTitle());
+				tmpVideo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
+				tmpVideo.setThumbnail(thumbnail);
+				
+				if(videoResultList != null && !videoResultList.isEmpty()) {
+					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
+					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
+					tmpVideo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
+				}
+				tmpVideo.setCommentList(getCommentPop(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), tmpVideo.getCommentCount()));
+				
+				videoInfoList.add(tmpVideo);
+			}
+		}
+	}
+	
 	public static List<Video> Videos(String videoId){
 		Properties properties = new Properties();
 	    try {
@@ -954,26 +1146,29 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		}
 	}
 	
-	public void doMysqlToElasticsearch(int limit) throws Exception {
+	public void doMysqlToElasticsearch(int limit, String start, String end) throws Exception {
 		
 		VideoInfo tmpVideo = new VideoInfo();
+		tmpVideo.setStart(start);
+		tmpVideo.setEnd(end);
 		
 		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-		
+		VideoInfoLog log = null;
 		int cnt = 0;
+		HttpEntity<Object> requestEntity = null;
+		ResponseEntity<String> response = null;
 		
 //		for( int limit = 10 ; limit < 100 ; limit += 10) {
 			for(VideoInfo videoInfo : videoInfoList) {
 				
-				System.out.println("===cnt:" + cnt++);
+				System.out.println("start : "+ start + "limit : " + limit + "===cnt:" + cnt++);
 				
 				videoInfo.setLimit(limit);
 				List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
 				
-				VideoInfoLog log = new VideoInfoLog();
-	            HttpEntity<Object> requestEntity = null;
+				log = new VideoInfoLog();
 				
 				for( CommentInfo commentInfo : commentInfoList) {
 					
@@ -995,10 +1190,104 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 	                log.setMagnitude(commentInfo.getMagnitude());
 				
 	                requestEntity = new HttpEntity<Object>(log, headers);
-					ResponseEntity<String> response = new RestTemplate().exchange("http://124.111.196.176:9200/comment" + limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+					response = new RestTemplate().exchange("http://124.111.196.176:9200/comment" + limit + "/1/", HttpMethod.POST, requestEntity, String.class);
 				}
 				
 			}
 //		}
+	}
+	
+	public List<VideoInfo> searchPop() {
+		
+		Properties properties = new Properties();
+	    try {
+	      InputStream in = SearchSvc.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+	      properties.load(in);
+
+	    } catch (IOException e) {
+	      System.err.println("There was an error reading " + PROPERTIES_FILENAME + ": " + e.getCause()
+	          + " : " + e.getMessage());
+	      System.exit(1);
+	    }
+	    
+	    List<VideoInfo> videoInfoList = new ArrayList<VideoInfo>();
+		try {
+			/*
+			 * The YouTube object is used to make all API requests. The last argument is
+			 * required, but because we don't need anything initialized when the HttpRequest
+			 * is initialized, we override the interface and provide a no-op function.
+			 */
+			youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpRequestInitializer() {
+				public void initialize(HttpRequest request) throws IOException {
+				}
+			}).setApplicationName("youtube-cmdline-search-sample").build();
+
+			// Get query term from user.
+//			String queryTerm = getInputQuery();
+
+			
+			File txt = new File(SearchSvc.class.getResource("/wordlist.txt").getFile());
+			Scanner scan = new Scanner(txt);
+			ArrayList<String> testData = new ArrayList<String>() ;
+			while(scan.hasNextLine()){
+				testData.add(scan.nextLine());
+			}
+			
+//			String queryTerm = keyword;
+			
+			YouTube.Search.List search = youtube.search().list("id,snippet");
+			
+			/*
+			 * It is important to set your developer key from the Google Developer Console
+			 * for non-authenticated requests (found under the API Access tab at this link:
+			 * code.google.com/apis/). This is good practice and increased your quota.
+			 */
+			String apiKey = properties.getProperty("youtube.apikey");
+			search.setKey(apiKey);
+			search.setOrder("viewCount");
+			search.setRegionCode("US");
+			/*
+			 * We are only searching for videos (not playlists or channels). If we were
+			 * searching for more, we would add them as a string like this:
+			 * "video,playlist,channel".
+			 */
+			search.setType("video");
+			
+			/*
+			 * This method reduces the info returned to only the fields we need and makes
+			 * calls more efficient.
+			 */
+			//search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+			search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+			search.setMaxResults(50L);
+			
+			int w=0;
+			SearchListResponse searchResponse = search.execute();
+			List<SearchResult> searchResultList = searchResponse.getItems();
+			
+			for(int i=0 ; i<60 ; i++) {
+				
+				System.out.println("====================>" + w++);
+				if (searchResultList != null) {
+					prettyPrintCsearchPop(searchResultList.iterator(), null, videoInfoList);
+				}
+				search.setPageToken(searchResponse.getNextPageToken());
+				searchResponse = search.execute();
+				searchResultList = searchResponse.getItems();
+			}
+			
+		} catch (GoogleJsonResponseException e) {
+			System.err.println(
+					"There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
+		} catch (IOException e) {
+			System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+		
+		//searchDao.addVideoInfo(videoInfoList.get(0));
+		//searchDao.selectVideoInfo();
+		
+		return videoInfoList;
 	}
 }

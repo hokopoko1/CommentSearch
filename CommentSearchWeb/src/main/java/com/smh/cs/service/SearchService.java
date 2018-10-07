@@ -37,4 +37,21 @@ public interface SearchService {
 	public int updateCategoriLive(CommentInfo commentInfo) throws Exception;
 	
 	public int updateCategoriFailLive(CommentInfo commentInfo) throws Exception;
+	
+	
+	public List<VideoInfo> selectVideoInfoPop(VideoInfo videoInfo) throws Exception;
+	
+	public int addVideoInfoPop(VideoInfo videoInfo) throws Exception;
+	
+	public int addCommentInfoPop(CommentInfo commentInfo) throws Exception;
+	
+	public List<CommentInfo> selectCommentInfoPop(VideoInfo videoInfo) throws Exception;
+	
+	public int updateSentimentPop(CommentInfo commentInfo) throws Exception;
+	
+	public int updateSentimentFailPop(CommentInfo commentInfo) throws Exception;
+	
+	public int updateCategoriPop(CommentInfo commentInfo) throws Exception;
+	
+	public int updateCategoriFailPop(CommentInfo commentInfo) throws Exception;
 }

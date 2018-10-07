@@ -389,7 +389,7 @@ public class SearchSvc {
 		return videoInfoList;
 	}
 	
-	public List<VideoInfo> searchPop() {
+	private List<VideoInfo> searchPop() {
 		
 		Properties properties = new Properties();
 	    try {

@@ -300,4 +300,152 @@
 			id = #{id}
 	</update>
 
+
+	
+	<insert id="addVideoInfoPop" parameterType="com.smh.cs.model.VideoInfo">
+		INSERT IGNORE INTO
+			video_info_pop(
+				video_id,
+				title,
+				video_time,
+				thumbnail,
+				type,
+				description,
+				view_count,
+				comment_count,
+				title_length,
+				description_length
+			)
+		VALUES
+			(
+				#{videoId},
+				#{title},
+				#{videoTime},
+				#{thumbnail},
+				#{type},
+				#{description},
+				#{viewCount},
+				#{commentCount},
+				#{titleLength},
+				#{descriptionLength}
+			)
+	</insert>
+	
+	<insert id="addCommentInfoPop" parameterType="com.smh.cs.model.CommentInfo">
+		INSERT IGNORE INTO
+			comment_pop(
+				video_id,
+				author,
+				time,
+				comment,
+				comment_length,
+				chat,
+				chat_length,
+				sentiment,
+				magnitude,
+				reg_date,
+				category,
+				confidence,
+				cate_update
+			)
+		VALUES
+			(
+				#{videoId},
+				#{author},
+				#{time},
+				#{comment},
+				#{commentLength},
+				#{chat},
+				#{chatLength},
+				#{sentiment},
+				#{magnitude},
+				now(),
+				#{category},
+				#{confidence},
+				#{cateUpdate}
+			)
+	</insert>
+	                   
+	<select id="selectVideoInfoPop" resultType="videoInfo">
+		SELECT 
+			id, 
+			video_id As videoId, 
+			title,
+			video_time As videoTime,
+			thumbnail,
+			type,
+			description,
+			view_count AS viewCount,
+			comment_count AS commentCount,
+			title_length AS titleLength,
+			description_length AS descriptionLength
+		
+		FROM video_info_pop
+		<if test="start != null and end != null">
+			WHERE
+				id <![CDATA[>=]]> #{start}
+				AND id <![CDATA[<]]> #{end}
+		</if>
+	</select>
+
+	<select id="selectCommentInfoPop" parameterType="com.smh.cs.model.CommentInfo" resultType="com.smh.cs.model.CommentInfo">
+		SELECT id, 
+			video_id As videoId,
+			author,
+			time,
+			comment,
+			comment_length AS commentLength,
+			sentiment, 
+			magnitude, 
+			chat,
+			chat_length AS chatLength,
+			senti_update AS sentiUpdate,
+			category,
+			confidence,
+			cate_update AS cateUpdate
+		FROM comment_pop
+		WHERE video_id = #{videoId}
+		<if test="sentiUpdate != null">
+			AND senti_update IS NULL
+		</if>
+		<if test="limit != 0">
+    		LIMIT #{limit}
+		</if>
+	</select>
+                              
+	<update id="updateSentimentPop" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment_pop SET
+			sentiment = #{sentiment},
+			magnitude = #{magnitude},
+			senti_update = 'true',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateSentimentFailPop" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment_pop SET
+			senti_update = 'fail',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateCategoriPop" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment_pop SET
+			category = #{category},
+			confidence = #{confidence},
+			cate_update = 'true',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
+	
+	<update id="updateCategoriFailPop" parameterType="com.smh.cs.model.CommentInfo">
+		UPDATE comment_pop SET
+			cate_update = 'fail',
+			update_date = now()
+		WHERE
+			id = #{id}
+	</update>
 </mapper>
