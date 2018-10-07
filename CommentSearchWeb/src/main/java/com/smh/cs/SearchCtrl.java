@@ -221,7 +221,7 @@ public class SearchCtrl {
 		VideoInfoDT rtn = new VideoInfoDT();
 		
 		if( "true".equals(learning) ) {
-			searchSvc.searchVideo(keyword, "live", null, null);
+			searchVideo(keyword, "live", null, null);
 		}
 		
 		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
@@ -581,7 +581,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		}
 	}
 	
-	private static void prettyPrintLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+	public void prettyPrintLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
 
 		System.out.println("\n=============================================================");
 		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
@@ -626,6 +626,28 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
 					
 				}
+				
+				VideoInfo videoInfo = new VideoInfo();
+				
+				videoInfo.setVideoId(rId.getVideoId());
+				videoInfo.setTitle(singleVideo.getSnippet().getTitle());
+				videoInfo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
+				videoInfo.setType("live");
+				videoInfo.setThumbnail(thumbnail);
+				videoInfo.setTitleLength(singleVideo.getSnippet().getTitle().length());
+				if(videoResultList != null && !videoResultList.isEmpty()) {
+					videoInfo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+					videoInfo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
+					videoInfo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
+					videoInfo.setDescriptionLength(videoResultList.get(0).getSnippet().getDescription().length());
+				}
+				try {
+					service.addVideoInfoLive(videoInfo);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				tmpVideo.setChatList(getLiveChat(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), videoResultList));
 				
 				videoInfoList.add(tmpVideo);
@@ -727,7 +749,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 	    return videoResultList;
 	}
 	
-static public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, BigInteger viewCount, List<Video> videoResultList) {
+	public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, BigInteger viewCount, List<Video> videoResultList) {
 		
 		List<ChatInfo> chatInfoList = new ArrayList<ChatInfo>();
 		
@@ -775,7 +797,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
         return chatInfoList;
 	}
 
-	private static void listChatMessages(String videoId, String title, String videoTime, String description, BigInteger viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
+	public void listChatMessages(String videoId, String title, String videoTime, String description, BigInteger viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 			// Get chat messages from YouTube
@@ -799,6 +821,7 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 	                System.out
 	                        .println("\n-------------------------------------------------------------\n");
 	                
+	                
 	                log.setVideoId(videoId);
 	                log.setTitle(title);
 	                log.setVideoTime(videoTime);
@@ -811,8 +834,22 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 	                log.setDescriptionLength(description.length());
 	                log.setChatLength(snippet.getDisplayMessage().length());
 	                
-	                requestEntity = new HttpEntity<Object>(log, headers);
-					ResponseEntity<String> responseLive = new RestTemplate().exchange("http://124.111.196.176:9200/newlive/1/", HttpMethod.POST, requestEntity, String.class);
+	                CommentInfo commentInfo = new CommentInfo();
+	                
+	                commentInfo.setVideoId(videoId);
+                    commentInfo.setTime(snippet.getPublishedAt().toString());
+                    commentInfo.setChat(snippet.getDisplayMessage());
+                    commentInfo.setChatLength(snippet.getDisplayMessage().length());
+
+                    try {
+						service.addCommentInfoLive(commentInfo);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	                
+	               // requestEntity = new HttpEntity<Object>(log, headers);
+					//ResponseEntity<String> responseLive = new RestTemplate().exchange("http://124.111.196.176:9200/newlive/1/", HttpMethod.POST, requestEntity, String.class);
 					
 	//						System.out.println(buildOutput(snippet.getPublishedAt(), snippet.getDisplayMessage(), message.getAuthorDetails(), snippet.getSuperChatDetails()));
 				}
@@ -827,33 +864,33 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 		VideoInfo tmpVideo = new VideoInfo();
 		tmpVideo.setStart(start);
 		tmpVideo.setEnd(end);
-		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
+		List<VideoInfo> videoInfoList = service.selectVideoInfoLive(tmpVideo);
 		
 		int cnt = 0;
 		
 		for(VideoInfo videoInfo : videoInfoList) {
 			
-			System.out.println("===cnt:" + cnt++);
+			System.out.println("start : " + start + "===cnt:"  + cnt++);
 			
 			videoInfo.setSentiUpdate("true");
-			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+			List<CommentInfo> commentInfoList = service.selectCommentInfoLive(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
-
-				System.out.println("id:" + commentInfo.getId());
-				System.out.println("VideoId:" + commentInfo.getVideoId());
-				System.out.println("comment:" + commentInfo.getComment());
+//
+				//System.out.println("id:" + commentInfo.getId());
+				//System.out.println("VideoId:" + commentInfo.getVideoId());
+				//System.out.println("chat:" + commentInfo.getChat());
 				
 				if( commentInfo.getSentiUpdate() == null ) {
-					Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(commentInfo.getComment());
-					
+					Sentiment sentiment = NLAnalyze.getInstance().analyzeSentiment(commentInfo.getChat());
+				//	System.out.println("Sentiment:" + sentiment);
 					if( sentiment != null) {
 						commentInfo.setSentiment(sentiment.getScore());
 						commentInfo.setMagnitude(sentiment.getMagnitude());
 						
-						service.updateSentiment(commentInfo);
+						service.updateSentimentLive(commentInfo);
 					}else {
-						service.updateSentimentFail(commentInfo);
+						service.updateSentimentFailLive(commentInfo);
 					}
 				}
 			}
@@ -866,25 +903,25 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 		VideoInfo tmpVideo = new VideoInfo();
 		tmpVideo.setStart(start);
 		tmpVideo.setEnd(end);
-		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
+		List<VideoInfo> videoInfoList = service.selectVideoInfoLive(tmpVideo);
 		
 		int cnt = 0;
 		
 		for(VideoInfo videoInfo : videoInfoList) {
 			
-			System.out.println("===cnt:" + cnt++);
+			System.out.println("start : " + start + "===cnt:"  + cnt++);
 			
 //			videoInfo.setSentiUpdate("true");
-			List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+			List<CommentInfo> commentInfoList = service.selectCommentInfoLive(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
 
 				System.out.println("id:" + commentInfo.getId());
-				System.out.println("VideoId:" + commentInfo.getVideoId());
-				System.out.println("comment:" + commentInfo.getComment());
+				//System.out.println("VideoId:" + commentInfo.getVideoId());
+				//System.out.println("chat:" + commentInfo.getChat());
 				
 				//if( commentInfo.getCateUpdate() == null ) {
-					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getComment());
+					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getChat());
 					System.out.println(categories);
 					if( categories != null ) {
 						
@@ -905,9 +942,9 @@ static public List<ChatInfo> getLiveChat(String videoId, String title, String vi
 						commentInfo.setCategory(category);
 						commentInfo.setConfidence(confidence);
 						
-						service.updateCategori(commentInfo);
+						service.updateCategoriLive(commentInfo);
 					}else {
-						service.updateCategoriFail(commentInfo);
+						service.updateCategoriFailLive(commentInfo);
 					}
 					
 					

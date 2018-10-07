@@ -63,4 +63,44 @@ public class SearchDaoImpl implements SearchDao{
 	public int updateCategoriFail(CommentInfo commentInfo) {
 		return sqlSession.update(namespace + ".updateCategoriFail", commentInfo);
 	}
+	
+	@Override
+	public int addVideoInfoLive(VideoInfo videoInfo) {
+		return sqlSession.insert(namespace + ".addVideoInfoLive", videoInfo);
+	}
+	
+	@Override
+	public List<VideoInfo> selectVideoInfoLive(VideoInfo videoInfo) {
+		return sqlSession.selectList(namespace + ".selectVideoInfoLive", videoInfo);
+	}
+	
+	@Override
+	public int addCommentInfoLive(CommentInfo commentInfo) {
+		return sqlSession.insert(namespace + ".addCommentInfoLive", commentInfo);
+	}
+	
+	@Override
+	public List<CommentInfo> selectCommentInfoLive(VideoInfo videoInfo){
+		return sqlSession.selectList(namespace + ".selectCommentInfoLive", videoInfo);
+	}
+	
+	@Override
+	public int updateSentimentLive(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateSentimentLive", commentInfo);
+	}
+	
+	@Override
+	public int updateSentimentFailLive(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateSentimentFailLive", commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriLive(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateCategoriLive", commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriFailLive(CommentInfo commentInfo) {
+		return sqlSession.update(namespace + ".updateCategoriFailLive", commentInfo);
+	}
 }

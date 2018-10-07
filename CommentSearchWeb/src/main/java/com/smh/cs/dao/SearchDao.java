@@ -26,4 +26,20 @@ public interface SearchDao {
 	
 	public int updateCategoriFail(CommentInfo commentInfo);
 	
+	public int addVideoInfoLive(VideoInfo videoInfo);
+	
+	public int addCommentInfoLive(CommentInfo commentInfo);
+	
+	public List<VideoInfo> selectVideoInfoLive(VideoInfo videoInfo) throws Exception;
+	
+	public List<CommentInfo> selectCommentInfoLive(VideoInfo videoInfo) throws Exception;
+	
+	public int updateSentimentLive(CommentInfo commentInfo);
+	
+	public int updateSentimentFailLive(CommentInfo commentInfo);
+	
+	public int updateCategoriLive(CommentInfo commentInfo);
+	
+	public int updateCategoriFailLive(CommentInfo commentInfo);
+	
 }

@@ -124,6 +124,45 @@
 
 	}
 	
+	function csearchVideoLive(){
+		var keyword = document.getElementById("search").value;
+		var learning = "true";
+		
+		var uri="/csearchVideoLive";  
+	    var params="?keyword="+keyword+"&learning="+learning;  
+	    
+	    var oTable = $('#csearchTables').DataTable({
+	    	"processing" : true,
+	    	"serverSide" : true,
+	    	destroy : true,
+	    	"bStateSave" : true,
+	    	ajax : {
+	    		type:"POST",  
+	 			url:uri + params,
+	    	},
+	    	columns: [
+	    		/*
+	    		{ 
+	    			title: "videoId", data:"videoId", "visible" : false,
+	    			"fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeVideoId(sData)		
+	    				);}
+	    		},*/
+	    		{
+	    			title: "Video", data:"thumbnail", "fnCreatedCell" : function(nTd, sData, oData, iRow, iCol){
+	    				$(nTd).html(
+	    					makeThumnail(oData["videoId"], sData)		
+	    				);}
+	    		},
+	    		{ title: "title", data:"title" },
+	    		{ title: "score", data:"score" }
+	    	]
+	    	
+	    });
+
+	}
+	
 	function searchPop(){
 		var keyword = document.getElementById("search").value;
 		var learning = document.getElementById("learning").checked?"true":"false";
@@ -459,9 +498,9 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearch();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){csearchVideoLive();}"/>
 			                        </div>
-									<button type="submit" onclick="csearch();" class="btn btn-success">Submit</button>
+									<button type="submit" onclick="csearchVideoLive();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>

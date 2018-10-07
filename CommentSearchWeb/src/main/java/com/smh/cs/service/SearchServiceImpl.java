@@ -55,4 +55,45 @@ public class SearchServiceImpl implements SearchService{
 	public int updateCategoriFail(CommentInfo commentInfo) throws Exception{
 		return dao.updateCategoriFail(commentInfo);
 	}
+	
+	
+	@Override
+	public List<VideoInfo> selectVideoInfoLive(VideoInfo videoInfo) throws Exception {
+		return dao.selectVideoInfoLive(videoInfo);
+	}
+	
+	@Override
+	public int addVideoInfoLive(VideoInfo videoInfo) throws Exception {
+		return dao.addVideoInfoLive(videoInfo);
+	}
+	
+	@Override
+	public int addCommentInfoLive(CommentInfo commentInfo) throws Exception{
+		return dao.addCommentInfoLive(commentInfo);
+	}
+	
+	@Override
+	public List<CommentInfo> selectCommentInfoLive(VideoInfo videoInfo) throws Exception{
+		return dao.selectCommentInfoLive(videoInfo);
+	}
+	
+	@Override
+	public int updateSentimentLive(CommentInfo commentInfo) throws Exception{
+		return dao.updateSentimentLive(commentInfo);
+	}
+	
+	@Override
+	public int updateSentimentFailLive(CommentInfo commentInfo) throws Exception{
+		return dao.updateSentimentFailLive(commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriLive(CommentInfo commentInfo) throws Exception{
+		return dao.updateCategoriLive(commentInfo);
+	}
+	
+	@Override
+	public int updateCategoriFailLive(CommentInfo commentInfo) throws Exception{
+		return dao.updateCategoriFailLive(commentInfo);
+	}
 }

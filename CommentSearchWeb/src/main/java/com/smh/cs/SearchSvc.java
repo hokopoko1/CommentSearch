@@ -524,7 +524,7 @@ public class SearchSvc {
 		}
 	}
 	
-	private static void prettyPrintLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
+	private void prettyPrintLive(Iterator<SearchResult> iteratorSearchResults, String query, List<VideoInfo> videoInfoList) {
 
 		System.out.println("\n=============================================================");
 		System.out.println("   First " + NUMBER_OF_VIDEOS_RETURNED + " videos for search on \"" + query + "\".");
@@ -567,8 +567,29 @@ public class SearchSvc {
 					tmpVideo.setDescription(videoResultList.get(0).getSnippet().getDescription());
 					tmpVideo.setTags(videoResultList.get(0).getSnippet().getTags());
 					tmpVideo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
-					
+					tmpVideo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
 				}
+				VideoInfo videoInfo = new VideoInfo();
+				
+				videoInfo.setVideoId(rId.getVideoId());
+				videoInfo.setTitle(singleVideo.getSnippet().getTitle());
+				videoInfo.setVideoTime(singleVideo.getSnippet().getPublishedAt().toString());
+				videoInfo.setType("live");
+				videoInfo.setThumbnail(thumbnail);
+				videoInfo.setTitleLength(singleVideo.getSnippet().getTitle().length());
+				if(videoResultList != null && !videoResultList.isEmpty()) {
+					videoInfo.setDescription(videoResultList.get(0).getSnippet().getDescription());
+					videoInfo.setViewCount(videoResultList.get(0).getStatistics().getViewCount());
+					videoInfo.setCommentCount(videoResultList.get(0).getStatistics().getCommentCount());
+					videoInfo.setDescriptionLength(videoResultList.get(0).getSnippet().getDescription().length());
+				}
+				try {
+					service.addVideoInfoLive(videoInfo);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				tmpVideo.setChatList(getLiveChat(rId.getVideoId(), singleVideo.getSnippet().getTitle(), tmpVideo.getVideoTime(), tmpVideo.getDescription(), tmpVideo.getViewCount(), videoResultList));
 				
 				videoInfoList.add(tmpVideo);
@@ -804,7 +825,7 @@ public class SearchSvc {
 	    return searchResultList;
 	}
 	
-	static public List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, BigInteger viewCount, List<Video> videoResultList) {
+	private List<ChatInfo> getLiveChat(String videoId, String title, String videoTime, String description, BigInteger viewCount, List<Video> videoResultList) {
 		
 		List<ChatInfo> chatInfoList = new ArrayList<ChatInfo>();
 		
@@ -852,7 +873,7 @@ public class SearchSvc {
         return chatInfoList;
 	}
 	
-	private static void listChatMessages(String videoId, String title, String videoTime, String description, BigInteger viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
+	private void listChatMessages(String videoId, String title, String videoTime, String description, BigInteger viewCount, final String liveChatId, final String nextPageToken, long delayMs, final String apiKey, List<Video> videoResultList) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 			// Get chat messages from YouTube
