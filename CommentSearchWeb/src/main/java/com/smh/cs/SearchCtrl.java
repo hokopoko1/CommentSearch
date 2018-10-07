@@ -1095,7 +1095,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		VideoInfo tmpVideo = new VideoInfo();
 		tmpVideo.setStart(start);
 		tmpVideo.setEnd(end);
-		List<VideoInfo> videoInfoList = service.selectVideoInfoLive(tmpVideo);
+		List<VideoInfo> videoInfoList = service.selectVideoInfoPop(tmpVideo);
 		
 		int cnt = 0;
 		
@@ -1104,7 +1104,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 			System.out.println("start : " + start + "===cnt:"  + cnt++);
 			
 //			videoInfo.setSentiUpdate("true");
-			List<CommentInfo> commentInfoList = service.selectCommentInfoLive(videoInfo);
+			List<CommentInfo> commentInfoList = service.selectCommentInfoPop(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
 
@@ -1113,7 +1113,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 				//System.out.println("chat:" + commentInfo.getChat());
 				
 				//if( commentInfo.getCateUpdate() == null ) {
-					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getChat());
+					List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(commentInfo.getComment());
 					System.out.println(categories);
 					if( categories != null ) {
 						
@@ -1134,9 +1134,9 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 						commentInfo.setCategory(category);
 						commentInfo.setConfidence(confidence);
 						
-						service.updateCategoriLive(commentInfo);
+						service.updateCategoriPop(commentInfo);
 					}else {
-						service.updateCategoriFailLive(commentInfo);
+						service.updateCategoriFailPop(commentInfo);
 					}
 					
 					
