@@ -405,9 +405,7 @@
 			cate_update AS cateUpdate
 		FROM comment_pop
 		WHERE video_id = #{videoId}                             
-		<if test="sentiUpdate != null">
 			AND cate_update IS NULL
-		</if>
 		<if test="limit != 0">
     		LIMIT #{limit}
 		</if>

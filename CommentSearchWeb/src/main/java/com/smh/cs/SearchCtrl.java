@@ -1103,7 +1103,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 			
 			System.out.println("start : " + start + "===cnt:"  + cnt++);
 			
-			videoInfo.setSentiUpdate("true");
+//			videoInfo.setSentiUpdate("true");
 			List<CommentInfo> commentInfoList = service.selectCommentInfoPop(videoInfo);
 
 			for( CommentInfo commentInfo : commentInfoList) {
