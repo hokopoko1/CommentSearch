@@ -1165,7 +1165,9 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 				
 				System.out.println("start : "+ start + "limit : " + limit + "===cnt:" + cnt++);
 				
-				videoInfo.setLimit(limit);
+				if( limit != 0) {
+					videoInfo.setLimit(limit);
+				}
 				List<CommentInfo> commentInfoList = service.selectCommentInfoLive(videoInfo);
 				
 				log = new VideoInfoLog();
@@ -1192,7 +1194,11 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 	                log.setChatLength(commentInfo.getChatLength());
 				
 	                requestEntity = new HttpEntity<Object>(log, headers);
-					response = new RestTemplate().exchange("http://localhost:9200/chat"+ limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+	                if( limit != 0) {
+	                	response = new RestTemplate().exchange("http://localhost:9200/chat"+ limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+	                }else {
+	                	response = new RestTemplate().exchange("http://localhost:9200/chat/1/", HttpMethod.POST, requestEntity, String.class);
+	                }
 				}
 				
 			}
