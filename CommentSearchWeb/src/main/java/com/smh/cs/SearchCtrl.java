@@ -1152,7 +1152,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		tmpVideo.setStart(start);
 		tmpVideo.setEnd(end);
 		
-		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
+		List<VideoInfo> videoInfoList = service.selectVideoInfoPop(tmpVideo);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		VideoInfoLog log = null;
@@ -1165,8 +1165,8 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 				
 				System.out.println("start : "+ start + "limit : " + limit + "===cnt:" + cnt++);
 				
-				videoInfo.setLimit(limit);
-				List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
+//				videoInfo.setLimit(limit);
+				List<CommentInfo> commentInfoList = service.selectCommentInfoPop(videoInfo);
 				
 				log = new VideoInfoLog();
 				
@@ -1190,7 +1190,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 	                log.setMagnitude(commentInfo.getMagnitude());
 				
 	                requestEntity = new HttpEntity<Object>(log, headers);
-					response = new RestTemplate().exchange("http://124.111.196.176:9200/comment" + limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+					response = new RestTemplate().exchange("http://124.111.196.176:9200/newpop/1/", HttpMethod.POST, requestEntity, String.class);
 				}
 				
 			}
