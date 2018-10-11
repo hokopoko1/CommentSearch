@@ -43,12 +43,14 @@
     });
 	
 	function search(){
-		csearch();
+		//csearch();
 		
 		var keyword = document.getElementById("search").value;
+		var senti = document.getElementById("senti").checked?"true":"false";
+		var cate = document.getElementById("cate").checked?"true":"false";
 		
 		var uri="/searchVideo";  
-	    var params="?keyword="+keyword;  
+	    var params="?keyword="+keyword+"&senti="+senti+"&cate="+cate;  
 	    
 	    var oTable = $('#dataTables').DataTable({
 	    	"processing" : true,
@@ -499,9 +501,9 @@
 									<label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">Keyword <span class="required">*</span>
 			                        </label>
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
-			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){searchPop();}"/>
+			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search();}"/>
 			                        </div>
-									<button type="submit" onclick="searchPop();" class="btn btn-success">Submit</button>
+									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">
 		                            <label>
@@ -509,6 +511,12 @@
 		                            </label>
 		                            <label>
 		                              <input type="checkbox" id="live" class="js-switch" /> live
+		                            </label>
+		                            <label>
+		                              <input type="checkbox" id="senti" class="js-switch" /> sentiment
+		                            </label>
+		                            <label>
+		                              <input type="checkbox" id="cate" class="js-switch" /> category
 		                            </label>
 		                        </div>
 		                        <div class="col-md-6 col-sm-6 col-xs-12">

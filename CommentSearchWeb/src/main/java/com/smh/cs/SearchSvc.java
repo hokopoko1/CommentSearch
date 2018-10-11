@@ -78,6 +78,8 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
+import com.google.cloud.language.v1beta2.ClassificationCategory;
+import com.google.cloud.language.v1beta2.Sentiment;
 import com.google.common.collect.Lists;
 import com.smh.cs.dao.SearchDao;
 import com.smh.cs.model.Bucket;
@@ -91,6 +93,7 @@ import com.smh.cs.model.VideoInfo;
 import com.smh.cs.model.VideoInfoLog;
 import com.smh.cs.service.SearchService;
 import com.smh.util.Auth;
+import com.smh.util.NLAnalyze;
 
 @Component
 public class SearchSvc {
@@ -134,7 +137,7 @@ public class SearchSvc {
 	@Autowired
 	SearchDao searchDao;
 	
-	public List<VideoInfo> csearchVideo(String keyword, String mode) throws IOException {
+	public List<VideoInfo> csearchVideo(String keyword, String mode, String senti, String cate) throws IOException {
 		//TODO:
 //		HttpHeaders headers = new HttpHeaders();
 //		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -144,6 +147,13 @@ public class SearchSvc {
 		
 //    	response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Return.class);
     	
+		
+		Float score = 0F;
+		Float magnitude_score = 0.1F;
+		
+		String category = null;
+		String confidence = null;
+		
 		JSONObject requestBody = new JSONObject();
 		JSONObject multi_match = new JSONObject();
 		JSONObject query = new JSONObject();
@@ -166,16 +176,88 @@ public class SearchSvc {
 		JSONObject max_score2 = new JSONObject();
 		JSONObject script = new JSONObject();
 		
+		JSONObject bool = new JSONObject();
+		JSONObject must = new JSONObject();
+		
+		JSONObject should = new JSONObject();
+		JSONArray shouldArry = new JSONArray();
+		JSONObject range = new JSONObject();
+		
+		JSONObject sentiment = new JSONObject();
+		JSONObject magnitude = new JSONObject();
+		JSONObject category_keyword = new JSONObject();
+		JSONObject term = new JSONObject();
+		
+		
 		fieldData.add("title");
 		if( "comment".equals(mode) ) {
 			fieldData.add("comment");
 		}
+		if( "chat".equals(mode) ) {
+			fieldData.add("chat");
+		}
+		
 		fieldData.add("description");
+		
+		
+		
+		sentiment.put("gte", score - 0.1F);
+		sentiment.put("lte", score + 0.1F);
+		magnitude.put("gte", 0.1F);
+		
+		if( "true".equals(cate)) {
+			List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(keyword);
+			System.out.println(categories);
+			if( categories != null ) {
+				
+				int i = 0;
+				for( ClassificationCategory cfc : categories) {
+					if( i == 0) {
+						category = cfc.getName();
+						confidence = confidence + cfc.getConfidence();
+					}else {
+						category = category + "," + cfc.getName();
+						confidence = confidence + "," +  cfc.getConfidence();
+					}
+					i++;
+				}
+				
+				fieldData.add("category");
+				keyword = keyword + " " + category;
+//				category_keyword.put("category", category);
+//				should.put("term", category_keyword);
+//				shouldArry.add(should);
+			}
+		}
+		
+		if ( "true".equals(senti)) {
+			Sentiment sentimentResponse = NLAnalyze.getInstance().analyzeSentiment(keyword);
+			System.out.println(sentimentResponse);
+			
+			if( sentimentResponse != null) {
+	        	score = sentimentResponse.getScore();
+	        	magnitude_score = sentimentResponse.getMagnitude();
+	        }
+			should = new JSONObject();
+			range.put("sentiment", sentiment);
+			should.put("range", range);
+			shouldArry.add(should);
+			should = new JSONObject();
+			range = new JSONObject();
+			range.put("magnitude", magnitude);
+			should.put("range", range);
+			shouldArry.add(should);
+		}
 		
 		multi_match.put("query", keyword);
 		multi_match.put("fields", fieldData);
 		
-		query.put("multi_match", multi_match);
+		must.put("multi_match", multi_match);
+		
+		bool.put("must", must);
+		
+		bool.put("should", shouldArry);
+		query.put("bool", bool);
 		
 		terms.put("field", "videoTime");
 		terms.put("size", "10");
@@ -192,12 +274,16 @@ public class SearchSvc {
 		aggs.put("dedup_docs", dedup_docs);
 		
 		dedup.put("terms", terms);
+			
+		
 		dedup.put("aggs", aggs);
 		
 		aggsh.put("dedup", dedup);
 		
+		
 		requestBody.put("query", query);
 		requestBody.put("aggs", aggsh);
+		
 		
 //		requestEntity = new HttpEntity<Object>(requestBody, headers);
 		RestClient restClient = RestClient.builder(
@@ -206,7 +292,7 @@ public class SearchSvc {
 		
 		Request request = new Request(
 			    "POST",  
-			    "/comment30/1/_search");   
+			    "/comment/1/_search");   
 		
 		String reqbody = requestBody.toJSONString();
 		

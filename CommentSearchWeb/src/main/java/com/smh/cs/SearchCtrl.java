@@ -153,13 +153,13 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, Locale locale, Model model) throws IOException {
+	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, @RequestParam("senti") String senti, @RequestParam("cate") String cate, Locale locale, Model model) throws IOException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
 //		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search", null, null);
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "tag");
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", senti, cate);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -181,7 +181,7 @@ public class SearchCtrl {
 			searchVideo(keyword, "live", startDate, endDate);
 		}
 
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -208,7 +208,7 @@ public class SearchCtrl {
 			searchSvc.searchVideo(keyword, "csearch", null, null);
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment");
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment", null, null);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -224,7 +224,7 @@ public class SearchCtrl {
 			searchVideo(keyword, "live", null, null);
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment");
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -1152,7 +1152,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 		tmpVideo.setStart(start);
 		tmpVideo.setEnd(end);
 		
-		List<VideoInfo> videoInfoList = service.selectVideoInfoLive(tmpVideo);
+		List<VideoInfo> videoInfoList = service.selectVideoInfo(tmpVideo);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 		VideoInfoLog log = null;
@@ -1168,7 +1168,7 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 				if( limit != 0) {
 					videoInfo.setLimit(limit);
 				}
-				List<CommentInfo> commentInfoList = service.selectCommentInfoLive(videoInfo);
+				List<CommentInfo> commentInfoList = service.selectCommentInfo(videoInfo);
 				
 				log = new VideoInfoLog();
 				
@@ -1195,9 +1195,9 @@ public List<VideoInfo> searchVideo(String keyword, String mode, String startDate
 				
 	                requestEntity = new HttpEntity<Object>(log, headers);
 	                if( limit != 0) {
-	                	response = new RestTemplate().exchange("http://localhost:9200/chat"+ limit + "/1/", HttpMethod.POST, requestEntity, String.class);
+	                	response = new RestTemplate().exchange("https://search-csearch-3wn4atquyg36ywxw24uvnjam3e.ap-northeast-2.es.amazonaws.com/comment"+ limit + "/1/", HttpMethod.POST, requestEntity, String.class);
 	                }else {
-	                	response = new RestTemplate().exchange("http://localhost:9200/chat/1/", HttpMethod.POST, requestEntity, String.class);
+	                	response = new RestTemplate().exchange("https://search-csearch-3wn4atquyg36ywxw24uvnjam3e.ap-northeast-2.es.amazonaws.com/comment/1/", HttpMethod.POST, requestEntity, String.class);
 	                }
 				}
 				
