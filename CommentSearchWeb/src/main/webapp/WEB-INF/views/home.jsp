@@ -48,9 +48,10 @@
 		var keyword = document.getElementById("search").value;
 		var senti = document.getElementById("senti").checked?"true":"false";
 		var cate = document.getElementById("cate").checked?"true":"false";
+		var mode = document.getElementById("mode").value;
 		
 		var uri="/searchVideo";  
-	    var params="?keyword="+keyword+"&senti="+senti+"&cate="+cate;  
+	    var params="?keyword="+keyword+"&senti="+senti+"&cate="+cate+"&mode="+mode;  
 	    
 	    var oTable = $('#dataTables').DataTable({
 	    	"processing" : true,
@@ -503,6 +504,7 @@
 			                        <div class="col-md-6 col-sm-6 col-xs-12">
 			                          <input type="text" id="search" onkeypress="if( event.keyCode==13 ){search();}"/>
 			                        </div>
+			                        <input type="text" id="mode"/>
 									<button type="submit" onclick="search();" class="btn btn-success">Submit</button>
 								</div>
 								<div class="col-md-6 col-sm-6 col-xs-12">

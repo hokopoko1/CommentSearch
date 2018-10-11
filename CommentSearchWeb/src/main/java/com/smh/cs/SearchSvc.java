@@ -137,7 +137,7 @@ public class SearchSvc {
 	@Autowired
 	SearchDao searchDao;
 	
-	public List<VideoInfo> csearchVideo(String keyword, String mode, String senti, String cate) throws IOException {
+	public List<VideoInfo> csearchVideo(String keyword, String mode, String senti, String cate, int index) throws IOException {
 		//TODO:
 //		HttpHeaders headers = new HttpHeaders();
 //		headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
@@ -198,16 +198,15 @@ public class SearchSvc {
 		}
 		
 		fieldData.add("description");
-		
-		
-		
 		sentiment.put("gte", score - 0.1F);
 		sentiment.put("lte", score + 0.1F);
 		magnitude.put("gte", 0.1F);
 		
 		if( "true".equals(cate)) {
+			fieldData.add("category");
+			
 			List<ClassificationCategory> categories = NLAnalyze.getInstance().analyzeCategories(keyword);
-			System.out.println(categories);
+//			System.out.println(categories);
 			if( categories != null ) {
 				
 				int i = 0;
@@ -222,17 +221,17 @@ public class SearchSvc {
 					i++;
 				}
 				
-				fieldData.add("category");
-				keyword = keyword + " " + category;
-//				category_keyword.put("category", category);
-//				should.put("term", category_keyword);
-//				shouldArry.add(should);
+//				fieldData.add("category");
+//				keyword = keyword + " " + category;
+				category_keyword.put("category", category);
+				should.put("match", category_keyword);
+				shouldArry.add(should);
 			}
 		}
 		
 		if ( "true".equals(senti)) {
 			Sentiment sentimentResponse = NLAnalyze.getInstance().analyzeSentiment(keyword);
-			System.out.println(sentimentResponse);
+//			System.out.println(sentimentResponse);
 			
 			if( sentimentResponse != null) {
 	        	score = sentimentResponse.getScore();
@@ -284,15 +283,22 @@ public class SearchSvc {
 		requestBody.put("query", query);
 		requestBody.put("aggs", aggsh);
 		
-		
 //		requestEntity = new HttpEntity<Object>(requestBody, headers);
 		RestClient restClient = RestClient.builder(
+//				new HttpHost("search-csearch-3wn4atquyg36ywxw24uvnjam3e.ap-northeast-2.es.amazonaws.com")).build();
 		        new HttpHost("124.111.196.176", 9200, "http"),
 		        new HttpHost("124.111.196.176", 9201, "http")).build();
 		
-		Request request = new Request(
+		Request request = null;
+		if( index != 0 ) {
+			request = new Request(
 			    "POST",  
-			    "/comment/1/_search");   
+			    "/comment" + index + "/1/_search");
+		}else {
+			request = new Request(
+			    "POST",  
+			    "/comment/1/_search");
+		}
 		
 		String reqbody = requestBody.toJSONString();
 		
@@ -336,8 +342,9 @@ public class SearchSvc {
 		}
 		
 		avg = sum / cnt;
-		System.out.println("Avg " + mode + " = "  + avg);
-		
+		//System.out.println("Avg " + mode + " = "  + avg);
+		String format = String.format("%.6f" , avg);
+		System.out.println(format);
 		return csearchList;
 	}
 	

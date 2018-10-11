@@ -153,14 +153,33 @@ public class SearchCtrl {
 	}
 	
 	@RequestMapping(value = "/searchVideo", method = RequestMethod.POST)
-	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, @RequestParam("senti") String senti, @RequestParam("cate") String cate, Locale locale, Model model) throws IOException {
+	public @ResponseBody VideoInfoDT searchVideo(@RequestParam("keyword") String keyword, @RequestParam("mode") String mode, @RequestParam("senti") String senti, @RequestParam("cate") String cate, Locale locale, Model model) throws IOException {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		VideoInfoDT rtn = new VideoInfoDT();
 		
-//		List<VideoInfo> videoInfo = searchSvc.searchVideo(keyword, "search", null, null);
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", senti, cate);
-		rtn.setData(videoInfo);
+		File txt = new File(SearchSvc.class.getResource("/keywordList.txt").getFile());
+		Scanner scan = new Scanner(txt);
+		ArrayList<String> testData = new ArrayList<String>() ;
+		while(scan.hasNextLine()){
+			testData.add(scan.nextLine());
+		}
+		
+		int cnt = 1;
+		if( "test".equals(keyword) ) {
+			for(int index = 0 ; index < 100 ; index+= 10) {
+				System.out.println("index : " + index);
+				for(String text : testData) {
+					
+					List<VideoInfo> videoInfo = searchSvc.csearchVideo(text, mode, senti, cate, index);
+					
+					rtn.setData(videoInfo);
+				}
+			}
+		}else {
+			List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, mode, senti, cate, 0);
+			rtn.setData(videoInfo);
+		}
 		
 		return rtn;
 	}
@@ -181,7 +200,7 @@ public class SearchCtrl {
 			searchVideo(keyword, "live", startDate, endDate);
 		}
 
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null, 0);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -208,7 +227,7 @@ public class SearchCtrl {
 			searchSvc.searchVideo(keyword, "csearch", null, null);
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment", null, null);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "noComment", null, null,0);
 		rtn.setData(videoInfo);
 		
 		return rtn;
@@ -224,7 +243,7 @@ public class SearchCtrl {
 			searchVideo(keyword, "live", null, null);
 		}
 		
-		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null);
+		List<VideoInfo> videoInfo = searchSvc.csearchVideo(keyword, "comment", null, null, 0);
 		rtn.setData(videoInfo);
 		
 		return rtn;
